@@ -17,6 +17,7 @@ const partes = [
   ['velha', () => import('./jogos/velha.js')],
   ['copinhos', () => import('./jogos/copinhos.js')],
   ['cabo', () => import('./jogos/cabo.js')],
+  ['duelo', () => import('./jogos/duelo.js')],
 ];
 
 // Sem o herói (não carregou, não iniciou ou desistiu antes do show), a primeira tela fica como na reserva sem

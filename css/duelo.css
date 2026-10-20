@@ -1,0 +1,606 @@
+/* O duelo de cartas na areia do Coliseu (spec 07 §4, §5; design system 08 §6, keyframes dl-*). Linguagem pixel:
+   cantos retos, sombras duras, animações em degraus. Tudo mora em .dl-arena, uma camada sobre o palco da arena que
+   não recebe clique (só os filhos interativos). Medidas que dependem do palco chegam do JS como variáveis:
+   --P (pixel do sprite), --big-w/-h, --mini-w/-h, --over-w/-h, --hand-top, --setup-w, --banner-w.
+   Com movimento reduzido o base.css já tira animações e transições. */
+
+/* ---------- a arena vira palco ---------- */
+
+/* O subtítulo da seção vira narrador: altura fixa em N linhas (o palco não pula), cor de tinta, medida maior. */
+.arena.duelo .arena-cabeca .lede { max-width: 62ch; color: var(--tinta); }
+.arena.duelo .arena-cabeca .lede[data-narrador] {
+  height: calc(var(--linhas, 2) * 1.65em);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: var(--linhas, 2); line-clamp: var(--linhas, 2);
+  overflow: hidden;
+}
+
+/* O palco inteiro treme: [n,0] → [−n,1] → [n/2,0] → [0,0] em 180 ms. */
+.arena-palco.dl-treme { animation: dl-treme .18s steps(1, end) both; }
+@keyframes dl-treme {
+  0% { translate: calc(var(--tremor, 3) * 1px) 0; }
+  25% { translate: calc(var(--tremor, 3) * -1px) 1px; }
+  50% { translate: calc(var(--tremor, 3) * .5px) 0; }
+  75%, 100% { translate: 0 0; }
+}
+
+/* ---------- a porta de entrada: os gladiadores da arena ---------- */
+
+.duelo-alvos { position: absolute; inset: 0; z-index: 4; pointer-events: none; visibility: hidden; }
+.duelo-alvos.ligado { visibility: visible; }
+.duelo-alvo { position: absolute; pointer-events: auto; }
+.duelo-alvo:focus-visible { outline: 2px dashed var(--liga-1); outline-offset: 2px; }
+.duelo-alvos[data-dica] .duelo-alvo { outline: 2px dashed var(--liga-1); outline-offset: 2px; animation: duelo-dica .5s steps(1, end) infinite; }
+@keyframes duelo-dica { 50% { outline-color: transparent; } }
+.duelo-etiqueta { transform: translate(-50%, -100%); pointer-events: none; }
+
+/* ---------- a camada do duelo ---------- */
+
+.dl-arena {
+  --contorno: #191410; --areia-tinta: var(--tinta-areia, #7a6a50);
+  position: absolute; left: 0; top: 0; z-index: 5;
+  width: 100%; height: 100%;
+  overflow: hidden; overflow: clip;
+  pointer-events: none;
+  font-family: var(--fonte-texto); color: var(--tinta);
+  -webkit-user-select: none; user-select: none;
+}
+.dl-arena[hidden] { display: none; }
+.dl-arena button { pointer-events: auto; }
+.dl-arena .pixel, .dl-arena canvas { image-rendering: pixelated; }
+
+.dl-fx { position: absolute; left: 0; top: 0; pointer-events: none; }
+.dl-fx.tras { z-index: 1; }
+.dl-fx.frente { z-index: 4; }
+
+.dl-scrim { position: absolute; inset: 0; z-index: 6; background: #191410a8; animation: vh-dim .3s steps(3) both; }
+.dl-scrim[hidden] { display: none; }
+@keyframes vh-dim { from { opacity: 0; } }
+
+/* Metais das cartas (e da placa do grito): degraus 0–4 e o papel. */
+.dl-arena .m-bronze { --m0: #3a2b1b; --m1: #5c4427; --m2: #8d6a3b; --m3: #c09760; --m4: #e8cb95; --papel: #ece4d6; }
+.dl-arena .m-prata { --m0: #2e3236; --m1: #5b636a; --m2: #939ca4; --m3: #c3cbd1; --m4: #eef2f4; --papel: #e4e8ea; }
+.dl-arena .m-ouro { --m0: #5a3b0b; --m1: #986810; --m2: #cc961b; --m3: #ecc145; --m4: #fdeeab; --papel: #f4ebcf; }
+
+/* ---------- fileiras, vãos ---------- */
+
+.dl-row { position: absolute; z-index: 1; transition: opacity .25s steps(3); }
+.dl-arena[data-phase="setup"] .dl-row, .dl-arena:not([data-phase]) .dl-row { visibility: hidden; }
+.dl-row-label {
+  position: absolute; left: 50%; bottom: calc(100% + 10px); transform: translateX(-50%);
+  padding: 3px 6px 2px; white-space: nowrap;
+  font: 700 8.5px/1 var(--fonte-pixel); letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--areia-tinta); background: #ece4d6e6;
+}
+.dl-row[data-side="0"] .dl-row-label { color: var(--tinta); }
+.dl-cards { display: flex; justify-content: center; align-items: flex-end; margin: 0; padding: 0; list-style: none; }
+.dl-slot-card { position: relative; flex: none; transition: transform .25s steps(3); }
+.dl-slot-card.live { z-index: 2; transform: translateY(-6px); }
+.dl-slot-card.live > .dl-card { outline: 4px solid #ecc145; outline-offset: 2px; }
+.dl-slot-card.chegando { visibility: hidden; }
+.dl-row.placing .dl-slot-card { pointer-events: none; }
+.dl-row.placing .dl-slot-card > .dl-card { pointer-events: none; }
+
+/* O vão: um traço de 4 px piscando; apontado ou com foco, 8 px dourado e parado. A área de toque passa das bordas. */
+.dl-gap { position: relative; z-index: 3; flex: none; width: 12px; height: var(--mini-h); }
+.dl-gap-button { position: absolute; inset: -6px -14px; }
+.dl-gap-button::before {
+  content: ''; position: absolute; left: 50%; top: 6px; bottom: 6px; width: 4px; margin-left: -2px;
+  background: #b39d76; animation: dl-gap 1s steps(1, end) infinite;
+}
+.dl-gap-button:hover::before, .dl-gap-button:focus-visible::before, .dl-gap-button.armado::before {
+  width: 8px; margin-left: -4px; background: #ecc145; box-shadow: 0 0 0 2px var(--contorno); animation: none;
+}
+.dl-gap-button:focus-visible { outline: none; }
+@keyframes dl-gap { 50% { background: var(--liga-2); } }
+
+/* ---------- as cartas ---------- */
+
+.dl-card {
+  --f: #a8432c; --f-sombra: #7a2f1f; --f-luz: #f0a48c;
+  --padrao: color-mix(in srgb, var(--f) 24%, transparent);
+  position: relative; isolation: isolate;
+  display: flex; flex-direction: column; gap: 4px;
+  overflow: hidden; text-align: left;
+  color: #2c2116; background-color: var(--papel, #ece4d6);
+  box-shadow: 0 0 0 2px var(--contorno), inset 1px 1px 0 var(--m4), inset -1px -1px 0 var(--m0),
+    inset 0 0 0 4px var(--m2), inset 0 0 0 8px var(--m1);
+  transition: transform .15s steps(2);
+}
+.dl-card:focus-visible { outline: 2px solid var(--liga-0); outline-offset: 4px; }
+/* A faixa do topo, na cor do lutador. */
+.dl-card::before { content: ''; position: absolute; left: 0; right: 0; top: 0; z-index: 2; height: 8px; background: var(--f); }
+.dl-card > * { position: relative; z-index: 1; }
+
+.dl-card-who {
+  display: flex; align-items: center; gap: 4px; min-width: 0;
+  font: 700 8px/1 var(--fonte-pixel); letter-spacing: .5px; text-transform: uppercase; color: #6f5a3c; white-space: nowrap;
+}
+.dl-card-em { flex: none; width: 7px; height: 7px; fill: var(--f); }
+.dl-card-top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.dl-icon { flex: none; width: 13px; height: 13px; fill: currentColor; }
+.dl-icon.i-ataque { color: #a8432c; }
+.dl-icon.i-defesa { color: #5b636a; }
+.dl-icon.i-truque { color: #cc961b; }
+.dl-icon.i-force { color: #8a3a6e; }
+.dl-card-n { font: 600 21px/1 var(--fonte-numeral); color: #2c2116; }
+.dl-card-n.word { font: 700 15px/1 var(--fonte-pixel); letter-spacing: .5px; text-transform: uppercase; }
+.dl-card-ind { display: none; align-items: center; gap: 2px; margin-left: auto; font: 600 18px/1 var(--fonte-numeral); color: #8a3a6e; }
+.dl-card-ind .dl-icon { width: 16px; height: 16px; color: #8a3a6e; }
+.dl-card-name { font: 700 11px/1.15 var(--fonte-texto); color: #2c2116; overflow-wrap: anywhere; }
+.dl-card-golpe { font: 700 9px/1.2 var(--fonte-pixel); letter-spacing: .8px; text-transform: uppercase; color: var(--m4); }
+.dl-card-text { font: 400 12.5px/1.4 var(--fonte-texto); color: #4a3d30; }
+.dl-card-text.long { font-size: 11px; line-height: 1.3; }
+
+/* Mini (fileiras): o "quem" vira só o emblema no canto. */
+.dl-card.mini { width: var(--mini-w); height: var(--mini-h); padding: 10px 6px 5px; gap: 3px;
+  box-shadow: 0 0 0 2px var(--contorno), inset 1px 1px 0 var(--m4), inset -1px -1px 0 var(--m0),
+    inset 0 0 0 3px var(--m2), inset 0 0 0 6px var(--m1); }
+.dl-card.mini::before { height: 7px; }
+.dl-card.mini .dl-card-who { position: absolute; right: 6px; top: 11px; }
+.dl-card.mini .dl-card-who > span { display: none; }
+.dl-card.mini .dl-card-em { width: 14px; height: 14px; }
+.dl-card.mini .dl-card-top { justify-content: flex-start; gap: 3px; margin-top: 18px; }
+
+/* Grande (mão): em leque; apontada sobe 8 px e endireita; escolhida sobe 16 px com anel dourado. */
+.dl-card.big { width: var(--big-w); height: var(--big-h); padding: 12px 11px 10px; gap: 6px; flex: none;
+  box-shadow: 0 0 0 2px var(--contorno), inset 1px 1px 0 var(--m4), inset -1px -1px 0 var(--m0),
+    inset 0 0 0 4px var(--m2), inset 0 0 0 8px var(--m1), 0 5px 0 2px #19141040;
+  transform: rotate(calc(var(--i, 0) * 2.5deg)); }
+.dl-card.big::before { height: 9px; }
+.dl-card.big .dl-card-who { font-size: 9px; }
+.dl-card.big .dl-icon { width: 22px; height: 22px; }
+.dl-card.big .dl-card-n { font-size: 30px; }
+.dl-card.big .dl-card-n.word { font: 700 30px/1 var(--fonte-pixel); }
+.dl-card.big .dl-card-ind { display: flex; }
+.dl-card.big .dl-card-name { font-size: 15.5px; }
+.dl-card.big.picked { transform: translateY(-16px); outline: 5px solid #ecc145; outline-offset: 2px; }
+.dl-card.big.picked:focus-visible { outline: 5px solid #ecc145; }
+
+/* Sobre a cabeça: tamanho médio, com o resultado do lance no pé. */
+.dl-card.over { width: var(--over-w); height: var(--over-h); padding: 8px; gap: 3px;
+  box-shadow: 0 0 0 2px var(--contorno), inset 1px 1px 0 var(--m4), inset -1px -1px 0 var(--m0),
+    inset 0 0 0 4px var(--m2), inset 0 0 0 8px var(--m1), 0 4px 0 2px #19141040; }
+.dl-card.over .dl-card-who { margin-top: 2px; }
+.dl-card.over .dl-icon { width: 16px; height: 16px; }
+.dl-card.over .dl-card-n { font-size: 22px; }
+.dl-card.over .dl-card-n.word { font: 700 22px/1 var(--fonte-pixel); }
+.dl-card.over .dl-card-ind { display: flex; font-size: 15px; }
+.dl-card.over .dl-card-ind .dl-icon { width: 12px; height: 12px; }
+.dl-card.over .dl-card-name { font-size: 12.5px; }
+.dl-card.over .dl-card-text { font-size: 10.5px; line-height: 1.3; }
+.dl-card.over .dl-card-text.long { font-size: 9.5px; }
+.dl-card.over.minha .dl-card-who { color: var(--tinta); }
+
+/* Rebites da grande de bronze; cantos em L e o reflexo da grande de ouro. */
+.dl-card.big.m-bronze::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(var(--m4), var(--m4)) left 3px top 3px / 2px 2px no-repeat,
+    linear-gradient(var(--m4), var(--m4)) right 3px top 3px / 2px 2px no-repeat,
+    linear-gradient(var(--m4), var(--m4)) left 3px bottom 3px / 2px 2px no-repeat,
+    linear-gradient(var(--m4), var(--m4)) right 3px bottom 3px / 2px 2px no-repeat,
+    linear-gradient(var(--m0), var(--m0)) center top 3px / 2px 2px no-repeat,
+    linear-gradient(var(--m0), var(--m0)) center bottom 3px / 2px 2px no-repeat;
+}
+.dl-card.big.m-ouro::after {
+  content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background:
+    linear-gradient(var(--m2), var(--m2)) left 2px bottom 2px / 8px 2px no-repeat,
+    linear-gradient(var(--m2), var(--m2)) left 2px bottom 2px / 2px 8px no-repeat,
+    linear-gradient(var(--m2), var(--m2)) right 2px bottom 2px / 8px 2px no-repeat,
+    linear-gradient(var(--m2), var(--m2)) right 2px bottom 2px / 2px 8px no-repeat;
+}
+.dl-brilho {
+  position: absolute !important; inset: 0; z-index: 2 !important; pointer-events: none;
+  background: linear-gradient(110deg, transparent 42%, #fffaf06b 46%, #fffaf06b 54%, transparent 58%) no-repeat;
+  background-size: 300% 100%; background-position: 110% 0;
+  animation: dl-shine 5s steps(18) infinite;
+}
+@keyframes dl-shine { 0% { background-position: 110% 0; } 28%, 100% { background-position: -10% 0; } }
+
+/* O papel de cada lutador: caderno (Artigo), rede (Conexão), trilhos de commits (Merge), as etapas do CI (Review). */
+.dl-card.p-linhas {
+  background-image:
+    linear-gradient(90deg, transparent 7px, #a8432c40 7px 8px, transparent 8px),
+    repeating-linear-gradient(180deg, transparent 0 13px, var(--padrao) 13px 14px);
+  background-position: 0 0, 0 9px;
+}
+.dl-card.p-rede {
+  background-image:
+    repeating-linear-gradient(45deg, transparent 0 9px, var(--padrao) 9px 10px),
+    repeating-linear-gradient(-45deg, transparent 0 9px, var(--padrao) 9px 10px);
+}
+.dl-card.p-ramos {
+  background-image:
+    linear-gradient(90deg, transparent 9px, var(--padrao) 9px 11px, transparent 11px calc(100% - 11px), var(--padrao) calc(100% - 11px) calc(100% - 9px), transparent calc(100% - 9px)),
+    linear-gradient(180deg, var(--padrao) 0 4px, transparent 4px),
+    linear-gradient(180deg, var(--padrao) 0 4px, transparent 4px);
+  background-size: 100% 100%, 4px 12px, 4px 12px;
+  background-position: 0 0, 8px 14px, calc(100% - 8px) 14px;
+  background-repeat: no-repeat, repeat-y, repeat-y;
+}
+.dl-card.mini.p-ramos { background-position: 0 0, 6px 12px, calc(100% - 6px) 12px; }
+.dl-card.p-barras {
+  background-image: linear-gradient(90deg, var(--f) 0 calc(25% - 2px), transparent calc(25% - 2px) 25%,
+    var(--padrao) 25% calc(50% - 2px), transparent calc(50% - 2px) 50%,
+    var(--padrao) 50% calc(75% - 2px), transparent calc(75% - 2px) 75%, var(--padrao) 75% calc(100% - 2px), transparent calc(100% - 2px));
+  background-size: calc(100% - 16px) 2px; background-position: 8px 12px; background-repeat: no-repeat;
+}
+.dl-card.mini.p-barras { padding-top: 14px; background-size: calc(100% - 12px) 2px; background-position: 6px 9px; }
+
+/* Golpe especial: carta escura com o céu (o grafo de commits numa nuvem de bits). */
+.dl-card.golpe { background: #15122a; color: #f2eadc; }
+.dl-card.golpe .dl-sky { position: absolute; inset: 8px; z-index: 0; width: calc(100% - 16px); height: calc(100% - 16px); color: var(--m3); }
+.dl-card.mini.golpe .dl-sky { inset: 6px; width: calc(100% - 12px); height: calc(100% - 12px); }
+.dl-card.golpe .dl-card-who { color: var(--m3); }
+.dl-card.golpe .dl-card-em { fill: var(--f-luz); }
+.dl-card.golpe .dl-card-n, .dl-card.golpe .dl-card-name { color: #f2eadc; text-shadow: 0 1px 0 #15122a, 0 0 3px #15122a; }
+.dl-card.golpe .dl-card-text { color: #d9cfbd; text-shadow: 0 1px 0 #15122a; }
+.dl-card.golpe .dl-icon.i-ataque { color: #e0775a; }
+.dl-card.golpe .dl-icon.i-defesa { color: #c3cbd1; }
+.dl-card.golpe .dl-icon.i-truque { color: #ecc145; }
+.dl-card.golpe .dl-icon.i-force, .dl-card.golpe .dl-card-ind { color: #d8a4e8; }
+.dl-card.over.golpe .dl-card-golpe { font-size: 7.5px; }
+
+/* Verso (cartas do escultor ainda viradas): listras e a plaquinha com a estrela. */
+.dl-card.back { background: var(--m0); }
+.dl-card.back::before { display: none; }
+.dl-card-back {
+  position: absolute !important; inset: 6px; display: grid; place-items: center;
+  background: repeating-linear-gradient(45deg, var(--m1) 0 4px, var(--m0) 4px 8px);
+  box-shadow: inset 0 0 0 2px var(--m2);
+}
+.dl-back-star { width: 14px; height: 14px; padding: 3px; fill: var(--m3); background: var(--m0); box-shadow: 0 0 0 2px var(--m2); }
+
+.dl-card.flip { animation: dl-flip .3s steps(3) both; }
+@keyframes dl-flip { from { transform: scaleX(.1); } }
+.dl-card.de-novo { animation: dl-again .7s steps(7) both; }
+@keyframes dl-again {
+  0% { transform: scaleX(.1); }
+  15%, 70% { transform: translateY(-4px); filter: brightness(1.3) drop-shadow(3px 0 0 #ecc145) drop-shadow(-3px 0 0 #ecc145) drop-shadow(0 3px 0 #ecc145) drop-shadow(0 -3px 0 #ecc145); }
+  100% { transform: none; }
+}
+
+/* ---------- a mão ---------- */
+
+.dl-hand {
+  position: absolute; left: 0; right: 0; top: var(--hand-top); z-index: 5;
+  display: flex; justify-content: center; align-items: flex-start; gap: 10px; padding: 0 16px;
+  transform: translateY(calc(var(--big-h) + 48px)); visibility: hidden;
+  transition: transform .35s cubic-bezier(.2, .9, .25, 1.06), visibility 0s .35s;
+}
+.dl-hand.up { transform: none; visibility: visible; transition: transform .35s cubic-bezier(.2, .9, .25, 1.06), visibility 0s; }
+.dl-hand .dl-card.big:focus-visible { transform: translateY(-8px); }
+.dl-ghost { position: absolute !important; z-index: 6; margin: 0; pointer-events: none; transform-origin: 50% 50%; }
+.dl-arena:not(.narrow) .dl-hand .dl-card.big:not(.picked):hover { transform: translateY(-8px); }
+
+/* ---------- os lutadores na areia ---------- */
+
+.dl-fighters { position: absolute; inset: 0; pointer-events: none; }
+.dl-fighter { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; }
+.dl-sprite { position: absolute; left: 0; top: 0; }
+.dl-fighter.caiu .dl-sprite { opacity: .55; }
+
+/* Barra de vida: 46 × 8 sobre a cabeça, com um entalhe por marco; o número à direita. */
+.dl-bar { position: absolute; left: -23px; top: calc(var(--P) * -17px - 22px); width: 46px; height: 8px;
+  background: var(--placa-campo); box-shadow: 0 0 0 2px var(--contorno); }
+.dl-bar > i { position: absolute; left: 0; top: 0; bottom: 0; width: 100%; background: var(--liga-3);
+  box-shadow: inset 0 -2px 0 var(--liga-2); transition: width .3s steps(4); }
+.dl-bar.low > i { background: #a8432c; box-shadow: inset 0 -2px 0 #7a2f1f; }
+.dl-bar > s { position: absolute; top: -3px; bottom: -3px; width: 2px; margin-left: -1px; background: var(--contorno); text-decoration: none; }
+.dl-bar > s.past { top: 0; bottom: 0; background: #19141066; }
+.dl-bar > s.hold { animation: dl-hold .7s steps(7) both; }
+@keyframes dl-hold {
+  0%, 70% { top: -5px; bottom: -5px; width: 4px; margin-left: -2px; background: #ecc145; box-shadow: 0 0 0 1px var(--contorno); }
+}
+.dl-bar > b { position: absolute; left: calc(100% + 6px); top: 50%; transform: translateY(-50%);
+  font: 600 13px/1 var(--fonte-numeral); color: var(--tinta); }
+
+/* Alcance: 5 quadradinhos sob a barra. */
+.dl-alc { position: absolute; left: -21px; top: calc(var(--P) * -17px - 10px); display: flex; gap: 3px; }
+.dl-alc i { width: 6px; height: 6px; background: #efe6d3; box-shadow: inset 0 0 0 1px #b39d76; }
+.dl-alc i.on { background: #ecc145; box-shadow: inset 0 0 0 1px #cc961b; }
+
+/* Assinatura: a estrela da Recomendação ou o CI, na ponta esquerda da barra. */
+.dl-sig { position: absolute; left: -23px; top: calc(var(--P) * -17px - 41px); width: 14px; height: 14px; }
+.dl-sig[hidden] { display: none; }
+.dl-sig svg { width: 14px; height: 14px; }
+.dl-star { fill: #ecc145; filter: drop-shadow(1px 0 0 #191410) drop-shadow(-1px 0 0 #191410) drop-shadow(0 1px 0 #191410) drop-shadow(0 -1px 0 #191410); }
+.dl-ring .dl-seg { fill: #b39d76; }
+.dl-ring .dl-seg.on { fill: var(--f); }
+.dl-ring .dl-seg.new { animation: dl-seg .5s steps(4) both; }
+@keyframes dl-seg { 0%, 50% { fill: #fffaf0; } }
+.dl-sig.chega { animation: dl-chega .45s steps(5) both; }
+@keyframes dl-chega {
+  0% { opacity: 0; transform: translateY(-12px) scale(1.8); }
+  60% { opacity: 1; transform: scale(1.3); }
+}
+.dl-sig.fechou { animation: dl-fechou .6s steps(6) both; }
+@keyframes dl-fechou { 0% { transform: scale(1.6); } 50% { transform: scale(1.4) rotate(90deg); } }
+.dl-fighter.caiu .dl-sig { opacity: .5; }
+
+.dl-name { position: absolute; left: 0; top: 3px; transform: translateX(-50%); white-space: nowrap;
+  font: 700 8.5px/1 var(--fonte-pixel); letter-spacing: 1px; text-transform: uppercase; color: var(--areia-tinta); }
+.dl-fighter.ativo .dl-name { color: var(--tinta); }
+
+/* No fim, cada lutador é um botão: outro duelo por aquele time. */
+.dl-hit { position: absolute; left: calc(var(--P) * -8px); top: calc(var(--P) * -20px);
+  width: calc(var(--P) * 16px); height: calc(var(--P) * 20px); }
+.dl-arena .dl-hit { pointer-events: none; }
+.dl-arena[data-phase="over"] .dl-hit { pointer-events: auto; }
+.dl-hit:focus-visible { outline: 2px dashed var(--liga-1); outline-offset: 2px; }
+.dl-arena[data-phase="over"] .dl-fighter:hover .dl-sprite,
+.dl-arena[data-phase="over"] .dl-fighter:focus-within .dl-sprite { translate: 0 -2px; }
+
+/* ---------- os números que saltam ---------- */
+
+.dl-pops { position: absolute; top: calc(var(--P) * -17px + 24px); width: 0; height: 0; }
+.dl-fighter[data-dir="1"] .dl-pops { left: calc(var(--P) * -9px); }
+.dl-fighter[data-dir="-1"] .dl-pops { left: calc(var(--P) * 9px); }
+.dl-pop {
+  position: absolute; bottom: calc(var(--row, 0) * 28px); white-space: nowrap;
+  translate: var(--empurra, 0) 0;
+  font: 600 clamp(24px, 2.6vw, 36px)/1 var(--fonte-numeral);
+  animation: dl-pop 1.15s steps(8, end) both;
+}
+.dl-fighter[data-dir="1"] .dl-pop { right: 0; }
+.dl-fighter[data-dir="-1"] .dl-pop { left: 0; }
+@keyframes dl-pop {
+  0% { opacity: 0; transform: translateY(10px) scale(1.5); }
+  12%, 75% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-26px); }
+}
+.dl-pop.sai { animation: dl-pop-sai .16s steps(2) both; }
+@keyframes dl-pop-sai { from { opacity: 1; transform: translateY(-13px); } to { opacity: 0; transform: translateY(-26px); } }
+
+.dl-pop.hit { color: #a8432c; }
+.dl-pop.ind { color: #8a3a6e; }
+.dl-pop.self { font-size: 18px; }
+.dl-pop.heal { color: #5f6b48; }
+.dl-pop.up { font-size: clamp(18px, 1.9vw, 26px); color: #b9772d; }
+.dl-pop.held, .dl-pop.alc, .dl-pop.token, .dl-pop.cosmo, .dl-pop.cancel {
+  display: inline-flex; align-items: center; gap: 4px; padding: 4px 7px 3px;
+  font: 700 11px/1 var(--fonte-pixel); letter-spacing: .5px; box-shadow: 0 0 0 2px var(--contorno);
+}
+.dl-pop.held { color: #f2eadc; background: var(--placa); }
+.dl-pop.alc { color: var(--liga-sobre); background: var(--liga-2); }
+.dl-pop.token, .dl-pop.cosmo { color: #3b2606; background: #ecc145; }
+.dl-pop.cancel { color: #fffaf0; background: #a8432c; letter-spacing: 1.6px; text-transform: uppercase; }
+.dl-pop-icon { width: 12px; height: 12px; flex: none; }
+.dl-pop.held .dl-pop-icon { fill: #c3cbd1; }
+.dl-pop.token .dl-pop-icon { fill: #fffaf0; }
+.dl-pop.hate { font-size: 20px; color: #c0336a; }
+.dl-pop.hate.menos { color: #24806f; }
+
+/* ---------- Conflitos (sob o time que pode recebê-los) ---------- */
+
+.dl-hate {
+  position: absolute; z-index: 4; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 6px; padding: 4px 6px 3px; white-space: nowrap;
+  font: 700 8.5px/1 var(--fonte-pixel); letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--areia-tinta); background: #ece4d6e6; box-shadow: 0 0 0 2px #19141026;
+}
+.dl-hate-houses { display: flex; gap: 3px; }
+.dl-hate-houses i { width: 8px; height: 8px; background: #efe6d3; box-shadow: inset 0 0 0 1px #b39d76; }
+.dl-hate-houses i.on { background: #c0336a; box-shadow: inset 0 0 0 1px var(--contorno), inset -2px -2px 0 #851e47; }
+.dl-hate.full .dl-hate-houses i:last-child { background: #e0482a; outline: 3px solid #ecc145; }
+.dl-hate-houses i.new { animation: dl-house .5s steps(5) both; }
+@keyframes dl-house { 0%, 40% { background: #fff; transform: scale(1.6); } }
+.dl-hate-out { display: none; }
+.dl-hate.cancelado { color: #f2eadc; background: #a8432c; box-shadow: 0 0 0 2px var(--contorno); }
+.dl-hate.cancelado .dl-hate-out { display: inline; color: #fffaf0; letter-spacing: 2px; }
+.dl-hate.cai { animation: dl-cai .5s steps(5) both; }
+@keyframes dl-cai {
+  0% { transform: translateX(-50%) scale(1.5); }
+  33% { transform: translateX(calc(-50% + 4px)) rotate(-4deg); }
+  66% { transform: translateX(calc(-50% - 3px)) rotate(2deg); }
+  100% { transform: translateX(-50%); }
+}
+.dl-hate .dl-pops { left: calc(100% + 8px); top: 50%; }
+.dl-hate .dl-pop { left: 0; bottom: auto; top: calc(var(--row, 0) * -28px - 10px); }
+
+/* ---------- as cartas sobre as cabeças ---------- */
+
+.dl-vs { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+.dl-vs-slot { position: absolute; width: var(--over-w); visibility: hidden; }
+.dl-vs-slot[hidden] { display: none; }
+.dl-vs.up .dl-vs-slot { visibility: visible; animation: dl-over .28s steps(4) both; }
+@keyframes dl-over { from { opacity: 0; transform: translateY(16px) scale(.8); } }
+.dl-vs-out {
+  position: absolute; left: 6px; right: 6px; bottom: 8px; z-index: 3; padding: 4px 5px 3px;
+  font: 700 10px/1.3 var(--fonte-pixel); color: #f2eadc; text-align: center; background: var(--placa);
+  box-shadow: 0 0 0 1px var(--contorno);
+}
+.dl-vs-out:empty { display: none; }
+.dl-vs-out.rise { animation: dl-rise .25s steps(3) both; }
+@keyframes dl-rise { from { opacity: 0; transform: translateY(6px); } }
+.dl-vs-tail {
+  position: absolute; top: calc(100% + 2px); left: var(--tail, 50%); width: 10px; height: 6px; margin-left: -5px;
+  background: var(--contorno);
+  clip-path: polygon(0 0, 100% 0, 100% 34%, 80% 34%, 80% 67%, 60% 67%, 60% 100%, 40% 100%, 40% 67%, 20% 67%, 20% 34%, 0 34%);
+}
+
+/* ---------- o grito ---------- */
+
+.dl-gritos { position: absolute; inset: 0; z-index: 6; pointer-events: none; }
+.dl-grito {
+  position: absolute; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 10px 18px 9px; background: #110e1ce6;
+  box-shadow: 0 0 0 2px var(--contorno), inset 1px 1px 0 var(--m4), inset -1px -1px 0 var(--m0),
+    inset 0 0 0 4px var(--m2), inset 0 0 0 8px var(--m1), 0 6px 0 #19141040;
+  animation: dl-grito .36s steps(4) both;
+}
+.dl-grito strong {
+  font: 600 clamp(20px, 2.9vw, 40px)/1.05 var(--fonte-numeral); letter-spacing: .05em; text-transform: uppercase;
+  color: var(--m4); text-shadow: 0 3px 0 var(--m1); white-space: nowrap;
+}
+.dl-grito.curto { padding: 6px 9px 5px; box-shadow: inset 0 0 0 2px var(--m2); animation-duration: .2s; }
+.dl-grito.curto strong { font: 700 10.5px/1 var(--fonte-pixel); letter-spacing: 1.2px; text-shadow: none; }
+@keyframes dl-grito {
+  0% { opacity: 0; transform: scale(1.7); }
+  50% { opacity: 1; transform: scale(.95); }
+  75% { transform: scale(1.03); }
+  100% { transform: none; }
+}
+
+/* ---------- os painéis: tabuleiro, faixa do fim, "Como joga" ---------- */
+
+.dl-painel {
+  color: #f2eadc; background: var(--placa);
+  box-shadow: 0 0 0 2px var(--contorno), inset 0 0 0 2px var(--liga-0), 0 8px 0 #19141040;
+  pointer-events: auto;
+}
+.dl-painel :focus-visible { outline: 2px solid var(--liga-4); outline-offset: 3px; }
+
+.dl-setup { position: absolute; left: 50%; z-index: 6; width: var(--setup-w); padding: 16px 16px 14px; transform: translateX(-50%); }
+.dl-setup[hidden] { display: none; }
+.dl-setup.entra, .dl-end.entra { animation: dl-banner .4s steps(4) both; }
+@keyframes dl-banner { from { opacity: 0; transform: translate(-50%, -16px); } }
+.dl-setup-h { margin: 0 0 8px; font: 700 9px/1 var(--fonte-pixel); letter-spacing: 1.8px; text-transform: uppercase; color: var(--liga-3); }
+.dl-levels, .dl-metals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-bottom: 14px; }
+.dl-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 6px 10px; text-align: center;
+  background: var(--placa-linha); box-shadow: inset 0 0 0 2px var(--placa-campo);
+}
+.dl-tile:hover { background: var(--placa-linha-hover); }
+.dl-tile[aria-pressed="true"] { background: var(--liga-0); box-shadow: inset 0 0 0 2px var(--liga-3); }
+.dl-tile-sprite { flex: none; margin-bottom: 2px; }
+.dl-level-nome, .dl-metal-nome { font: 600 15px/1.1 var(--fonte-numeral); color: var(--liga-5); }
+.dl-level-sub { font: 700 8.5px/1 var(--fonte-pixel); letter-spacing: 1px; text-transform: uppercase; color: var(--liga-4); }
+.dl-level-nota { font-size: 11.5px; line-height: 1.3; color: #b5a990; }
+.dl-tile[aria-pressed="true"] .dl-level-nota { color: #d9cfbd; }
+.dl-metal { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; text-align: left; }
+.dl-metal-texto { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.dl-metal-nome { font-size: 13.5px; }
+.dl-metal.metal-bronze .dl-metal-nome { color: #e8cb95; }
+.dl-metal.metal-prata .dl-metal-nome { color: #eef2f4; }
+.dl-metal.metal-ouro .dl-metal-nome { color: #ecc145; }
+.dl-metal-sobre { font-size: 11.5px; line-height: 1.25; color: #b5a990; }
+.dl-metal-estado { font: 700 8.5px/1.2 var(--fonte-pixel); letter-spacing: 1px; text-transform: uppercase; color: var(--liga-4); }
+.dl-metal.bloqueado { cursor: var(--cursor-seta, default); }
+.dl-metal.bloqueado .dl-tile-sprite { filter: brightness(.3) grayscale(1); }
+.dl-metal.bloqueado .dl-metal-nome, .dl-metal.bloqueado .dl-metal-sobre, .dl-metal.bloqueado .dl-metal-estado { color: #8b8273; }
+.dl-setup-go { display: flex; justify-content: flex-end; align-items: center; gap: 18px; }
+
+.dl-go {
+  position: relative; padding: 10px 18px 9px;
+  font: 700 11px/1 var(--fonte-pixel); letter-spacing: 2px; text-transform: uppercase;
+  color: var(--liga-sobre); background: var(--liga-2);
+  box-shadow: inset 2px 2px 0 var(--liga-3), inset -2px -2px 0 var(--liga-1), 0 0 0 2px var(--contorno), 0 3px 0 2px var(--contorno);
+}
+.dl-go:hover { background: var(--liga-hover); }
+.dl-go:active { top: 2px; box-shadow: inset 2px 2px 0 var(--liga-1), inset -2px -2px 0 var(--liga-3), 0 0 0 2px var(--contorno); }
+.dl-go.dl-out { color: var(--liga-4); background: var(--placa);
+  box-shadow: inset 2px 2px 0 var(--placa-bisel), inset -2px -2px 0 var(--placa-campo), 0 0 0 2px var(--contorno), 0 3px 0 2px var(--contorno); }
+.dl-go.dl-out:hover { background: var(--placa-ergue); }
+.dl-link { font: 700 10px/1 var(--fonte-pixel); letter-spacing: 1px; color: #d9cfbd; text-decoration: underline; text-underline-offset: 4px; }
+.dl-link:hover { color: var(--liga-5); }
+
+/* A faixa do fim, onde estava a mão. */
+.dl-end { position: absolute; left: 50%; z-index: 6; width: var(--banner-w); transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 14px; pointer-events: none; }
+.dl-end[hidden] { display: none; }
+.dl-banner { width: 100%; padding: 18px 20px 16px; text-align: center; }
+.dl-banner-title { display: block; font: 600 clamp(22px, 2.4vw, 32px)/1.1 var(--fonte-numeral); color: var(--liga-5); }
+.dl-banner.win { box-shadow: 0 0 0 2px var(--contorno), inset 0 0 0 2px #cc961b, 0 8px 0 #19141040; }
+.dl-banner.win .dl-banner-title { color: #ecc145; }
+.dl-banner-text { margin: 8px 0 0; font-size: 13.5px; line-height: 1.45; color: #d9cfbd; }
+.dl-banner-score { margin: 10px 0 0; font: 600 12px/1.2 var(--fonte-numeral); letter-spacing: 1.6px; text-transform: uppercase; color: var(--liga-4); }
+.dl-end-go { display: flex; gap: 12px; }
+
+/* "Como joga": o rosto do escultor e o texto digitado (o inteiro, invisível, reserva o espaço). */
+.dl-tour { position: absolute; left: 50%; z-index: 8; width: min(560px, calc(100% - 24px)); transform: translateX(-50%);
+  display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px 12px 10px; animation: dl-banner .3s steps(3) both; }
+.dl-tour[hidden] { display: none; }
+.dl-tour-face { flex: none; margin: -14px -12px -10px -14px; }
+.dl-tour-body { flex: 1; min-width: 0; }
+.dl-tour-step { margin: 0 0 6px; font: 700 9px/1 var(--fonte-pixel); letter-spacing: 1.6px; text-transform: uppercase; color: var(--liga-3); }
+.dl-tour-line { position: relative; margin: 0; font: 500 13px/1.5 var(--fonte-pixel); color: #f2eadc; }
+.dl-tour-cheio { visibility: hidden; }
+.dl-tour-digitado { position: absolute; left: 0; top: 0; right: 0; }
+.dl-tour-legend { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 8px 0 0; font: 700 10px/1 var(--fonte-pixel); color: #d9cfbd; }
+.dl-tour-legend[hidden] { display: none; }
+.dl-tour-legend span { display: inline-flex; align-items: center; gap: 4px; }
+.dl-tour-legend svg { width: 14px; height: 14px; fill: currentColor; }
+.dl-tour-legend .k-ataque svg { color: #e0775a; }
+.dl-tour-legend .k-defesa svg { color: #c3cbd1; }
+.dl-tour-legend .k-truque svg { color: #ecc145; }
+.dl-tour-legend .k-force svg { color: #d8a4e8; }
+.dl-tour-go { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 10px; }
+
+/* O que o tour acende fica sobre o véu, com os textos claros. */
+.dl-arena .dl-lit { z-index: 7 !important; }
+.dl-arena.touring .dl-lit .dl-name, .dl-arena.touring .dl-lit .dl-bar > b { color: #f2eadc; }
+.dl-arena.touring .dl-row.dl-lit .dl-row-label { color: #f2eadc; background: var(--placa); }
+
+/* ---------- controles ---------- */
+
+.dl-ctrl { position: absolute; top: 10px; right: 12px; z-index: 7; display: flex; gap: 6px; }
+.dl-ctrl-b {
+  padding: 6px 9px 5px; font: 700 9.5px/1 var(--fonte-pixel); letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--liga-4); background: var(--placa); box-shadow: inset 0 0 0 2px var(--liga-0), 0 0 0 2px var(--contorno);
+}
+.dl-ctrl-b[hidden] { display: none; }
+.dl-ctrl-b:hover { background: var(--placa-ergue); }
+.dl-ctrl-b[aria-pressed="true"] { color: var(--liga-sobre); background: var(--liga-2); }
+.dl-ctrl-b:focus-visible { outline: 2px solid var(--liga-0); outline-offset: 3px; }
+
+/* ---------- palco escuro (o golpe especial queima) ---------- */
+
+.dl-arena.cosmo .dl-row { opacity: .16; }
+.dl-arena.cosmo .dl-name, .dl-arena.cosmo .dl-bar > b { color: #f2eadc; }
+.dl-arena.cosmo .dl-pop.hit { color: #ff8a6a; }
+.dl-arena.cosmo .dl-pop.ind { color: #e9b8f0; }
+.dl-arena.cosmo .dl-pop.heal { color: #9be3b5; }
+.dl-arena.cosmo .dl-pop.up { color: #ecc145; }
+
+/* ---------- estreito (palco < 900 px, classe do JS) ---------- */
+
+.dl-arena.narrow .dl-bar { left: -19px; width: 38px; }
+.dl-arena.narrow .dl-bar > b { left: calc(100% + 4px); font-size: 12px; }
+.dl-arena.narrow .dl-sig { left: -15px; }
+.dl-arena.narrow .dl-hate { gap: 4px; padding: 3px 4px 2px; font-size: 7.5px; letter-spacing: 1px; }
+.dl-arena.narrow .dl-hate-houses i { width: 7px; height: 7px; }
+.dl-arena.narrow .dl-hand { gap: 6px; }
+
+.dl-arena.narrow .dl-card.mini { padding: 7px 4px 4px; }
+.dl-arena.narrow .dl-card.mini .dl-card-name { display: none; }
+.dl-arena.narrow .dl-card.mini .dl-card-top { flex-direction: column; align-items: flex-start; margin-top: 12px; }
+.dl-arena.narrow .dl-card.mini .dl-icon { width: 11px; height: 11px; }
+.dl-arena.narrow .dl-card.mini .dl-card-n { font-size: 17px; }
+.dl-arena.narrow .dl-card.mini .dl-card-n.word { font-size: 11px; }
+.dl-arena.narrow .dl-card.mini .dl-card-who { right: 4px; top: 10px; }
+.dl-arena.narrow .dl-card.mini .dl-card-em { width: 10px; height: 10px; }
+.dl-arena.narrow .dl-card.mini.p-barras { padding-top: 11px; }
+
+/* A faixa (9 px) e a moldura (8 px) pedem um respiro maior que o da spec (6 px), senão cobrem o "quem" e o texto. */
+.dl-arena.narrow .dl-card.big { padding: 12px 9px 7px; gap: 3px; }
+.dl-arena.narrow .dl-card.big .dl-card-name { font-size: 12px; }
+.dl-arena.narrow .dl-card.big .dl-card-n { font-size: 19px; }
+.dl-arena.narrow .dl-card.big .dl-card-n.word { font-size: 19px; }
+.dl-arena.narrow .dl-card.big .dl-icon { width: 15px; height: 15px; }
+.dl-arena.narrow .dl-card.big .dl-card-ind { font-size: 14px; }
+.dl-arena.narrow .dl-card.big .dl-card-ind .dl-icon { width: 11px; height: 11px; }
+.dl-arena.narrow .dl-card.big .dl-card-golpe { font-size: 7.5px; }
+.dl-arena.narrow .dl-card.big .dl-card-text { font-size: 10.5px; line-height: 1.3; }
+.dl-arena.narrow .dl-card.big .dl-card-text.long { font-size: 9.5px; line-height: 1.25; }
+
+.dl-arena.narrow .dl-card.over .dl-card-text { display: none; }
+.dl-arena.narrow .dl-card.over .dl-card-ind { font-size: 11px; }
+.dl-arena.narrow .dl-vs-out { left: 4px; right: 4px; bottom: 5px; font-size: 9px; }
+.dl-arena.narrow .dl-grito.curto strong { font-size: 9.5px; }
+
+/* ---------- telas pequenas: tabuleiro e tour compactos ---------- */
+
+@media (max-width: 520px) {
+  .dl-setup { padding: 10px 10px 8px; }
+  .dl-levels, .dl-metals { gap: 6px; margin-bottom: 8px; }
+  .dl-level-nota { font-size: 10.5px; }
+  .dl-metal { display: flex; flex-direction: column; align-items: center; text-align: center; }
+  .dl-metal .dl-tile-sprite { display: none; }
+  .dl-metal-texto { align-items: center; }
+  .dl-metal-nome { font-size: 13px; }
+  .dl-metal-sobre { font-size: 10.5px; }
+  .dl-tour { gap: 8px; padding: 10px 10px 10px 6px; }
+  .dl-tour-line { font-size: 12px; line-height: 1.45; }
+}
