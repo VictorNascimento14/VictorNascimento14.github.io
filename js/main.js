@@ -10,6 +10,8 @@ const partes = [
   ['ano', () => import('./secoes/ano.js')],
   ['arena', () => import('./secoes/arena.js')],
   ['contato', () => import('./secoes/contato.js')],
+  // Fase 2: o que atravessa o site. Ouvem os sinais com { passados: true }, então podem vir depois das seções.
+  ['conquistas', () => import('./jogos/conquistas.js')],
 ];
 
 // Sem o herói (não carregou, não iniciou ou desistiu antes do show), a primeira tela fica como na reserva sem

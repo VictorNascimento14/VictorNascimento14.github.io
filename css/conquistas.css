@@ -1,0 +1,283 @@
+/* As medalhas (Fase 2, docs/arquitetura.md §10): o HUD do canto, o rótulo que desliza, o céu das moedas, a janela
+   pixel (de todos) e o medalheiro. Números da spec 06 §4.4–4.7 e da spec 08 §4.4–4.7. Tudo na linguagem pixel do
+   base.css: cantos retos, sombras duras, animações em degraus e as cores pelos tokens do metal. */
+
+/* ---------- o HUD: a moeda lisa, "n/25" e os 25 tracinhos ---------- */
+
+.med-hud {
+  position: fixed; z-index: var(--z-hud); top: 16px; right: 16px;
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px 5px 6px;
+  color: var(--px-texto); background: var(--placa);
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px var(--liga-0);
+}
+.med-hud[hidden] { display: none; }
+.med-hud:hover { background: var(--placa-relevo); }
+.med-hud:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 4px; }
+/* Sobre a 1ª tela, alinhado à margem e centrado na faixa do cabeçalho (83 px; 70 no celular). */
+.med-hud.sobre-heroi { top: 21px; right: var(--margem-larga); }
+
+.med-hud-moeda { flex: none; }
+.med-hud-moeda.pulou { animation: med-pulo .5s step-end; }
+@keyframes med-pulo {
+  20% { transform: translateY(-5px); }
+  45% { transform: translateY(-2px); }
+  70% { transform: translateY(-3px); }
+}
+.med-hud-texto { display: flex; flex-direction: column; gap: 5px; }
+.med-hud-conta { font: 600 13px/1 var(--fonte-numeral); letter-spacing: .6px; color: var(--liga-5); }
+.med-hud-medidor { display: flex; align-items: flex-end; gap: 1px; }
+.med-hud-medidor i { width: 2px; height: 4px; background: var(--placa-bisel); }
+.med-hud-medidor i.marco { height: 7px; margin-right: 2px; }
+.med-hud-medidor i.aceso { background: var(--liga-3); }
+/* O HUD segue o tom dele (durante o voo pode atrasar em relação ao <html>). */
+.med-hud[data-metal="prata"] .med-hud-medidor i.aceso { background: #c3cbd1; }
+.med-hud[data-metal="ouro"] .med-hud-medidor i.aceso { background: var(--ouro-vivo); }
+
+/* ---------- o rótulo: "medalha n de 25" e o nome, por alguns segundos ---------- */
+
+.med-rotulo {
+  position: fixed; z-index: var(--z-hud); top: 64px; right: 16px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  max-width: calc(100vw - 32px); padding: 8px 11px 9px;
+  text-align: right; color: var(--px-texto); background: var(--placa);
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px var(--liga-1);
+  cursor: var(--cursor-cinzel, pointer);
+}
+.med-rotulo[hidden] { display: none; }
+.med-rotulo.sobre-heroi { top: 69px; right: var(--margem-larga); }
+.med-rotulo.entra { animation: med-rotulo .32s steps(4) both; }
+@keyframes med-rotulo { from { opacity: 0; transform: translateY(-14px); } }
+.med-rotulo-tipo {
+  font: 700 8px/1.2 var(--fonte-pixel); letter-spacing: 1.8px; text-transform: uppercase; color: var(--liga-3);
+}
+.med-rotulo-nome { font: 600 16px/1.15 var(--fonte-numeral); color: var(--liga-5); }
+
+@media (max-width: 760px) {
+  .med-hud.sobre-heroi { top: 15px; right: 22px; }
+  .med-rotulo.sobre-heroi { top: 63px; right: 22px; }
+}
+
+/* ---------- o céu: moedas em voo, faíscas e a onda do metal ---------- */
+
+.med-ceu { position: fixed; inset: 0; width: 100%; height: 100%; z-index: var(--z-moedas); pointer-events: none; }
+
+/* ---------- a janela pixel (o medalheiro e quem mais pedir) ---------- */
+
+.janela {
+  position: fixed; inset: 0; z-index: var(--z-janela);
+  display: grid; place-items: center; padding: 12px;
+  background: var(--px-veu);
+  animation: janela-entra .18s steps(3) both;
+}
+.janela[hidden] { display: none; }
+@keyframes janela-entra { from { opacity: 0; } }
+
+.janela-folha {
+  position: relative; width: min(560px, 100%); max-height: calc(100svh - 24px);
+  overflow: auto; overscroll-behavior: contain;
+  padding: 16px 18px 20px;
+  color: var(--px-texto); background: var(--placa);
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px var(--liga-0), 0 12px 0 #19141055;
+  scrollbar-color: var(--liga-1) var(--placa-funda);
+}
+.janela-folha:focus { outline: none; }
+
+.janela-cabeca { display: flex; align-items: center; gap: 12px; margin: 0 34px 14px 0; }
+.janela-rosto { flex: none; }
+.janela-titulos { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.janela-titulo { margin: 0; font: 600 19px/1.15 var(--fonte-numeral); letter-spacing: .4px; color: var(--liga-5); }
+.janela-fala { margin: 0; min-height: 1.4em; font: 500 12px/1.4 var(--fonte-pixel); color: var(--liga-4); }
+
+.janela-fechar {
+  position: absolute; top: 10px; right: 10px; width: 30px; height: 30px;
+  font: 700 16px/1 var(--fonte-pixel); color: var(--liga-4); background: var(--liga-0);
+  box-shadow: inset 2px 2px 0 var(--placa-bisel), inset -2px -2px 0 var(--placa-campo), 0 0 0 2px var(--px-contorno);
+}
+.janela-fechar:hover { color: var(--liga-5); background: var(--placa-ergue); }
+.janela-fechar:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 3px; }
+
+.janela-corpo { font-size: 14px; line-height: 1.55; }
+
+@media (max-width: 560px) {
+  .janela-folha { padding: 14px 12px 16px; }
+}
+
+/* ---------- o medalheiro ---------- */
+
+.med-painel .janela-folha { width: min(640px, 100%); }
+/* A borda da folha acompanha o metal vestido. */
+html[data-metal="prata"] .med-painel .janela-folha {
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px #939ca4, 0 12px 0 #19141055;
+}
+html[data-metal="ouro"] .med-painel .janela-folha {
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px var(--ouro-fundo), 0 12px 0 #19141055;
+}
+
+.med-abas { display: flex; gap: 4px; margin-bottom: 18px; }
+.med-aba {
+  flex: 1; padding: 9px 10px 8px;
+  font: 700 10px/1 var(--fonte-pixel); letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--px-texto-3); background: var(--placa-linha);
+  box-shadow: inset 0 -2px 0 var(--placa-campo);
+}
+.med-aba:hover { color: var(--liga-4); background: var(--placa-linha-hover); }
+.med-aba[aria-selected="true"] { color: var(--liga-5); background: var(--liga-0); box-shadow: inset 0 -3px 0 var(--liga-3); }
+.med-aba:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 2px; }
+
+.med-sub {
+  margin: 24px 0 10px;
+  font: 700 9px/1.2 var(--fonte-pixel); letter-spacing: 1.8px; text-transform: uppercase; color: var(--liga-3);
+}
+.med-sub[hidden], .med-desafios[hidden] { display: none; }
+
+/* ----- Inventário ----- */
+
+.inv-heroi { display: grid; grid-template-columns: auto 1fr; align-items: end; gap: 18px; }
+
+/* O pedestal: um chão de 18 px e um bloco de 8 px recuado 46 px de cada lado, a 12 px do pé; o escultor por cima. */
+.inv-pedestal {
+  position: relative; width: 212px; height: 176px; overflow: hidden;
+  background: var(--placa-funda); box-shadow: inset 0 0 0 2px var(--liga-0);
+}
+.inv-pedestal::before {
+  content: ''; position: absolute; left: 2px; right: 2px; bottom: 2px; height: 16px;
+  background: var(--placa-campo); box-shadow: inset 0 2px 0 var(--liga-0);
+}
+.inv-pedestal::after {
+  content: ''; position: absolute; left: 46px; right: 46px; bottom: 12px; height: 8px;
+  background: var(--liga-2);
+  box-shadow: inset 0 2px 0 var(--liga-4), inset 0 -2px 0 var(--liga-1), 0 0 0 2px var(--px-contorno);
+}
+.inv-retrato { position: absolute; z-index: 1; left: 0; top: 0; }
+.inv-pedestal:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 3px; }
+
+.inv-quem { display: flex; flex-direction: column; gap: 6px; padding-bottom: 4px; }
+.inv-tipo {
+  font: 700 8px/1 var(--fonte-pixel); letter-spacing: 1.8px; text-transform: uppercase; color: var(--liga-3);
+}
+.inv-nome { font: 600 clamp(20px, 2.4vw, 26px)/1.1 var(--fonte-numeral); color: var(--liga-5); }
+.inv-nivel { font: 500 11.5px/1.45 var(--fonte-pixel); color: var(--px-texto-2); }
+
+.inv-encaixes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.inv-encaixe {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 8px 6px 10px;
+  background: var(--placa-linha); box-shadow: inset 0 0 0 2px var(--placa-campo);
+}
+.inv-encaixe:not(.bloqueado):hover { background: var(--placa-linha-hover); }
+.inv-encaixe[aria-pressed="true"] { background: var(--liga-0); box-shadow: inset 0 0 0 2px var(--liga-3); }
+.inv-encaixe:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 2px; }
+.inv-encaixe-nome { font: 600 13px/1.1 var(--fonte-numeral); color: var(--liga-5); }
+.inv-encaixe-estado { font: 500 10px/1.35 var(--fonte-pixel); text-align: center; color: var(--px-texto-3); }
+.inv-encaixe[aria-pressed="true"] .inv-encaixe-estado { color: var(--liga-4); }
+/* Bloqueado: a miniatura vira silhueta. */
+.inv-encaixe.bloqueado { cursor: var(--cursor-seta, default); }
+.inv-encaixe.bloqueado .inv-mini { filter: brightness(.3) saturate(0); }
+.inv-encaixe.bloqueado .inv-encaixe-nome { color: var(--px-apagado); }
+
+.inv-atributos { display: grid; gap: 9px; margin: 0; }
+.inv-atributo { display: grid; grid-template-columns: 132px 1fr 92px; align-items: center; gap: 12px; }
+.inv-atributo dt { display: flex; flex-direction: column; gap: 2px; font: 600 13px/1.1 var(--fonte-numeral); color: var(--liga-5); }
+.inv-atributo dt span { font: 500 9.5px/1.2 var(--fonte-pixel); color: var(--px-texto-3); }
+.inv-atributo dd { margin: 0; }
+.inv-barra { display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px; }
+.inv-barra .celula, .med-trilha-barra .celula { display: block; width: auto; height: 8px; }
+.inv-valor { font: 11px/1.2 var(--fonte-pixel); text-align: right; color: var(--liga-4); }
+
+@media (max-width: 520px) {
+  .inv-heroi { grid-template-columns: 1fr; justify-items: center; text-align: center; }
+  .inv-pedestal { width: 100%; max-width: 240px; height: 150px; }
+  .inv-quem { align-items: center; }
+  .inv-encaixe-estado { font-size: 9.5px; }
+  .inv-atributo { grid-template-columns: 96px 1fr 74px; gap: 8px; }
+}
+
+/* ----- Medalhas ----- */
+
+.med-trilha { position: relative; margin: 2px 0 26px; }
+.med-trilha-barra { display: grid; grid-template-columns: repeat(25, 1fr); gap: 3px; }
+.med-trilha-marca {
+  position: absolute; top: 16px;
+  font: 700 8px/1 var(--fonte-pixel); letter-spacing: 1.4px; text-transform: uppercase;
+}
+.med-trilha-marca::before { content: ''; position: absolute; top: -7px; width: 2px; height: 5px; background: currentColor; }
+.med-trilha-marca.prata { left: 52%; transform: translateX(-50%); color: #939ca4; }
+.med-trilha-marca.prata::before { left: calc(50% - 1px); }
+.med-trilha-marca.ouro { right: 0; color: var(--ouro-fundo); }
+.med-trilha-marca.ouro::before { right: 2px; }
+
+/* O fecho do ouro: o recado do Victor e o código. */
+.med-premio {
+  display: flex; flex-direction: column; gap: 8px;
+  margin: 0 0 20px; padding: 12px 14px;
+  background: var(--liga-0); box-shadow: inset 0 0 0 2px var(--ouro-fundo);
+}
+.med-premio[hidden] { display: none; }
+.med-premio h3 { margin: 0; font: 600 17px/1.2 var(--fonte-numeral); color: var(--ouro-claro); }
+.med-premio p { margin: 0; font-size: 13.5px; line-height: 1.5; color: var(--px-texto-2); }
+.med-premio a { color: var(--ouro-vivo); text-decoration: underline; text-underline-offset: 3px; overflow-wrap: anywhere; }
+.med-premio-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 2px; }
+.med-premio-codigo {
+  padding: 6px 10px;
+  font: 700 18px/1 var(--fonte-pixel); letter-spacing: 3px; color: var(--ouro-claro);
+  background: var(--placa-funda); user-select: all;
+}
+.med-premio .med-premio-assinatura { font: 600 14px/1.2 var(--fonte-numeral); color: var(--ouro-claro); }
+
+.med-quadro { display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 18px; }
+.med-grade {
+  display: grid; grid-template-columns: repeat(5, auto); gap: 4px;
+  margin: 0; padding: 8px; list-style: none;
+  background: var(--placa-funda); box-shadow: inset 0 0 0 2px var(--liga-0);
+}
+.med-encaixe { display: block; padding: 3px; }
+.med-encaixe:hover canvas { transform: translateY(-2px); }
+.med-encaixe.escolhido { background: var(--liga-0); box-shadow: inset 0 0 0 2px var(--liga-2); }
+.med-encaixe:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 1px; }
+
+.med-legenda { display: flex; flex-direction: column; gap: 8px; min-height: 96px; margin: 0; }
+.med-legenda-nome { font: 600 20px/1.15 var(--fonte-numeral); color: #8f7a5c; }
+.med-legenda-texto { font-size: 13.5px; line-height: 1.5; color: var(--px-texto-3); }
+.med-legenda.achada .med-legenda-nome { color: var(--liga-5); }
+.med-legenda.achada .med-legenda-texto { color: var(--px-texto-2); }
+
+.med-desafios { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.med-desafio {
+  display: grid; width: 100%; grid-template-columns: 1fr auto auto;
+  grid-template-areas: 'nome placar ir' 'onde placar ir';
+  align-items: center; column-gap: 14px; row-gap: 3px;
+  padding: 9px 10px 9px 12px; text-align: left;
+  background: var(--placa-linha);
+}
+.med-desafio:not(:disabled):hover { background: var(--placa-linha-hover); }
+.med-desafio:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 2px; }
+.med-desafio-nome { grid-area: nome; font: 600 14px/1.15 var(--fonte-numeral); color: var(--liga-5); }
+.med-desafio-onde { grid-area: onde; font-size: 12px; line-height: 1.3; color: var(--px-texto-3); }
+.med-desafio-placar { grid-area: placar; font: 11px/1.2 var(--fonte-pixel); text-align: right; color: var(--liga-4); }
+.med-desafio-ir {
+  grid-area: ir; padding: 6px 9px 5px;
+  font: 700 9px/1 var(--fonte-pixel); letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--liga-sobre); background: var(--liga-2);
+  box-shadow: inset 2px 2px 0 var(--liga-3), inset -2px -2px 0 var(--liga-1);
+}
+.med-desafio:not(:disabled):hover .med-desafio-ir { background: var(--liga-hover); }
+
+.med-rodape {
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px;
+  margin-top: 18px; padding-top: 12px; border-top: 2px solid var(--liga-0);
+}
+.med-apagar {
+  font: 11px/1.4 var(--fonte-pixel); color: var(--px-texto-3);
+  text-decoration: underline; text-underline-offset: 3px;
+}
+.med-apagar:hover, .med-apagar.armado { color: var(--liga-4); }
+.med-apagar:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 3px; }
+.med-nota { font-size: 11px; color: var(--px-apagado); }
+
+@media (max-width: 560px) {
+  .med-quadro { grid-template-columns: 1fr; justify-items: center; gap: 12px; text-align: center; }
+  .med-legenda { align-items: center; min-height: 0; }
+  .med-desafio { grid-template-columns: 1fr auto; grid-template-areas: 'nome ir' 'onde ir' 'placar ir'; }
+  .med-desafio-placar { text-align: left; }
+}
