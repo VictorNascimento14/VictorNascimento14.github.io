@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#11](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/11) — feat(conversa): a caixa de fala do escultor · [nota](prs/2026-10-20-pr-11-conversa.md)
 - [#10](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/10) — feat(conquistas): 25 moedas, medalheiro e metais · [nota](prs/2026-10-20-pr-10-conquistas.md)
 - [#9](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/9) — feat(contato): prado grego com quatro portas · [nota](prs/2026-10-20-pr-9-contato.md)
 - [#8](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/8) — feat(arena): LinkedIn × GitHub no Coliseu · [nota](prs/2026-10-20-pr-8-arena.md)
