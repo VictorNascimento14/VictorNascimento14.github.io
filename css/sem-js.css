@@ -4,6 +4,10 @@
 /* Herói: sem o prólogo para arrastar o bloco, a cena fica no lugar e o busto aparece inteiro. */
 .cena { transform: none !important; }
 
+/* Arena: o Coliseu, as estátuas e os cartões são montados pelo script; sem ele ficam o título e os dois links. */
+.arena-palco { display: none; }
+.arena { min-height: 0; padding-bottom: 72px; }
+
 /* Ano: a placa (com o total), as estatísticas e a legenda dependem do script; ficam o cabeçalho e o link do GitHub. */
 .placa, .ano-numeros, .placa-legenda { display: none; }
 .ano-pe { justify-content: center; }

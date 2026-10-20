@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#8](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/8) — feat(arena): LinkedIn × GitHub no Coliseu · [nota](prs/2026-10-20-pr-8-arena.md)
 - [#7](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/7) — feat(ano): placa de bronze com as contribuições de 2026 · [nota](prs/2026-10-20-pr-7-ano.md)
 - [#6](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/6) — feat(projetos): cinco caixas de bronze num anel 3D · [nota](prs/2026-10-20-pr-6-projetos.md)
 - [#5](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/5) — feat(heroi): prólogo, escultura em 7 golpes e o mascote companheiro · [nota](prs/2026-10-20-pr-5-heroi.md)
