@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#5](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/5) — feat(heroi): prólogo, escultura em 7 golpes e o mascote companheiro · [nota](prs/2026-10-20-pr-5-heroi.md)
 - [#4](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/4) — feat(arte): o escultor alado e os cursores em pixel art · [nota](prs/2026-10-20-pr-4-arte-escultor.md)
 - [#3](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/3) — feat(estilo): tokens, fontes e a linguagem pixel · [nota](prs/2026-10-20-pr-3-estilo.md)
 - [#2](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/2) — feat(nucleo): relógio, pixel, memória, sinais, movimento e rolagem · [nota](prs/2026-10-20-pr-2-nucleo.md)

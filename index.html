@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f0efea">
+  <meta name="description" content="Victor Nascimento, engenheiro de software full stack e IA. Construo e opero os sistemas da Trynux e da Campêlo Advocacia, do Postgres à tela.">
+  <title>victornascimento · esculpido commit a commit</title>
+  <link rel="icon" href="assets/img/icone.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/italiana.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- O metal conquistado entra antes da primeira pintura, para quem volta em prata ou ouro não ver o bronze piscar. -->
+  <script>try{var m=JSON.parse(localStorage.getItem('victornascimento:metal'));if(m==='prata'||m==='ouro')document.documentElement.dataset.metal=m}catch(e){}</script>
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/heroi.css">
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <svg class="icones-definidos" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-cinzel" viewBox="0 0 24 24"><path d="M20.5 3.5 17 7M16 5l3 3M17 7l-9.5 9.5-3.5 1 1-3.5L14.5 4.5M5 15l4 4"/></symbol>
+  </defs></svg>
+  <main>
+
+  <!-- seção: abertura (dono: heroi) -->
+  <div class="tela abertura" id="inicio">
+    <header class="cabecalho">
+      <a class="assinatura" href="./" aria-label="victornascimento, início"><svg class="icone" aria-hidden="true"><use href="#i-cinzel"/></svg><span>victornascimento<span class="ponto">.</span></span></a>
+      <span class="cabecalho-nota">ESCULPIDO COMMIT A COMMIT</span>
+    </header>
+    <div class="abertura-conteudo" aria-labelledby="nome">
+      <h1 class="letreiro" id="nome">victornascimento<span class="ponto">.</span></h1>
+      <div class="cena" id="cena" role="img" aria-label="Um pequeno escultor alado arrasta um bloco de mármore até o centro e esculpe sozinho o retrato de Victor.">
+        <img class="busto" id="busto" src="assets/img/busto.webp" width="1024" height="1536" alt="Victor sorrindo, num busto clássico de mármore" fetchpriority="high" draggable="false">
+        <canvas class="escultura" id="escultura" aria-hidden="true"></canvas>
+      </div>
+      <div class="camada-escultor" id="camada-escultor">
+        <canvas class="prologo-canvas pixel" id="prologo-canvas" aria-hidden="true"></canvas>
+        <div class="balao-pixel escultor-balao" id="escultor-balao" aria-hidden="true">Parece que tem alguém por aqui...</div>
+        <button class="escultor" id="escultor" type="button" aria-label="Conversar com o pequeno escultor" disabled>
+          <canvas class="escultor-sprite pixel" aria-hidden="true"></canvas>
+        </button>
+      </div>
+      <div class="ajuda painel-pixel" id="ajuda" role="group" aria-label="Ajudar a puxar o bloco" hidden>
+        <canvas class="ajuda-rosto pixel" id="ajuda-rosto" aria-hidden="true"></canvas>
+        <div class="ajuda-corpo">
+          <p class="ajuda-fala" id="ajuda-fala">Me ajuda a puxar?</p>
+          <div class="ajuda-linha"><span class="ajuda-medidor" id="ajuda-medidor" aria-hidden="true"></span><button class="botao-pixel grande" id="puxar" type="button">puxar</button></div>
+        </div>
+      </div>
+      <aside class="apresentacao">
+        <span class="rotulo">SISTEMAS COM IA</span>
+        <p class="apresentacao-titulo">Engenheiro de software<br><em>full stack e IA.</em></p>
+        <span class="apresentacao-texto">Construo e opero sistemas com IA<br>para escritórios de advocacia.<br>Do Postgres à tela.</span>
+      </aside>
+      <p id="anuncio" class="sr-only" aria-live="polite"></p>
+    </div>
+    <footer class="abertura-rodape"><a class="descer" href="#projetos">PROJETOS <span aria-hidden="true">↓</span></a></footer>
+  </div>
+  <!-- /seção: abertura -->
+
+  </main>
+  <noscript><link rel="stylesheet" href="css/sem-js.css"></noscript>
+</body>
+</html>

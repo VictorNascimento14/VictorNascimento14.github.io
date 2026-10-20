@@ -1,0 +1,5 @@
+/* Sem JavaScript: o busto aparece pronto e o conteúdo fica legível. Cada seção completa este arquivo. */
+.camada-escultor, canvas { display: none; }
+.busto { opacity: 1 !important; }
+/* Herói: sem o prólogo para arrastar o bloco, a cena fica no lugar e o busto aparece inteiro. */
+.cena { transform: none !important; }

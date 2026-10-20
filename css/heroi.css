@@ -1,0 +1,170 @@
+/* Primeira tela (o ateliê) e o escultor, inclusive depois de virar companheiro. Medidas da spec 01 §4.3 e da
+   spec 08 §3.1; camadas de dentro (isolation): letreiro 0 · cena 1 · nota 3 · escultor 4 · rodapé 5 · cabeçalho 6
+   · caixa de ajuda 7. */
+
+.abertura {
+  height: 100svh; min-height: 640px;
+  overflow: hidden; isolation: isolate;
+}
+
+/* ---------- cabeçalho ---------- */
+
+.cabecalho {
+  position: absolute; z-index: 6; top: 0; left: var(--margem-larga); right: var(--margem-larga);
+  height: var(--cabecalho-h);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.assinatura {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 17px; letter-spacing: -.6px; color: var(--tinta); text-decoration: none;
+}
+.assinatura .icone { width: 21px; height: 21px; color: var(--bronze); }
+.assinatura .ponto { color: var(--bronze); }
+.cabecalho-nota {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  font-size: 8px; letter-spacing: 1.9px; color: var(--rotulo-nota); white-space: nowrap;
+}
+
+/* ---------- letreiro, cena e busto ---------- */
+
+.abertura-conteudo { position: absolute; inset: 0; }
+
+/* O nome atravessa a tela atrás do busto, como marca d'água. 15,45vw faz os 17 caracteres ocuparem a mesma fração da
+   largura que o original (~97%). O primeiro filho do h1 tem de ser o texto: o prólogo mede a letra do pouso. */
+.letreiro {
+  position: absolute; z-index: 0; top: 50%; left: 0; width: 100%; margin: 0;
+  transform: translateY(-50%);
+  font: 400 15.45vw/.95 var(--fonte-display); letter-spacing: -.053em;
+  color: var(--salvia-letreiro); text-align: center; white-space: nowrap; user-select: none;
+}
+.letreiro .ponto { color: var(--salvia-ponto); }
+
+/* A cena começa fora da tela, à esquerda: o prólogo arrasta o bloco até o centro. */
+.cena, .camada-escultor { position: absolute; inset: 0; }
+.cena { z-index: 1; pointer-events: none; transform: translate3d(-200%, 0, 0); }
+
+/* O busto só aparece com as imagens prontas: até lá o rosto nunca pisca antes da hora. */
+.busto {
+  position: absolute; left: 50%; bottom: -3.5%; height: 101%; width: auto; max-width: none;
+  transform: translateX(-50%); object-fit: contain; user-select: none; opacity: 0;
+}
+body.pronto .busto, body.falhou .busto { opacity: 1; }
+
+/* A pedra: 1200 × 1000 lógicos esticados sobre a cena. */
+.escultura { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.escultura[hidden], .camada-escultor[hidden] { display: none; }
+
+/* ---------- o escultor ---------- */
+
+.camada-escultor { z-index: 4; pointer-events: none; }
+.camada-escultor.companheiro { position: fixed; z-index: var(--z-escultor); }
+.prologo-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.companheiro .prologo-canvas { display: none; }
+
+/* Posição pela ponta do cinzel: o JS move o botão com transform, sempre no px de dispositivo. */
+.escultor {
+  position: absolute; left: 0; top: 0; padding: 0; border: 0; background: none;
+  pointer-events: auto; opacity: 0; transition: opacity .35s;
+}
+body.esculpindo .escultor:not(:disabled) { opacity: 1; }
+.escultor:disabled { opacity: 0; pointer-events: none; }
+.escultor-sprite { display: block; pointer-events: none; }
+
+/* O balão é irmão do botão (links dentro de um botão não seriam clicáveis nem válidos). */
+.escultor-balao {
+  left: 0; top: 0;
+  opacity: 0; transition: opacity .15s; pointer-events: none;
+}
+.escultor-balao.falando { opacity: 1; }
+.escultor-balao a { text-decoration: underline; text-underline-offset: 2px; }
+/* Só o balão à vista tem link clicável: apagado (opacidade 0), ele não pode mais interceptar cliques. */
+.escultor-balao.falando a { pointer-events: auto; cursor: var(--cursor-cinzel, pointer); }
+
+/* ---------- caixa de ajuda: "Me ajuda a puxar?" ---------- */
+
+.ajuda {
+  position: absolute; z-index: 7; left: 50%; top: clamp(104px, 17vh, 190px);
+  display: flex; align-items: center; gap: 10px;
+  max-width: calc(100vw - 32px); padding: 10px 16px 10px 8px;
+  transform: translateX(-50%);
+  animation: entrar-ajuda .3s steps(4) both;
+}
+.ajuda[hidden] { display: none; }
+@keyframes entrar-ajuda {
+  from { opacity: 0; transform: translate(-50%, 8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+.ajuda-rosto { flex: none; }
+.ajuda-corpo { display: flex; flex-direction: column; gap: 9px; }
+.ajuda-fala { margin: 0; font: 500 13px/1.4 var(--fonte-pixel); white-space: nowrap; }
+.ajuda-linha { display: flex; align-items: center; gap: 14px; }
+.ajuda-medidor { display: inline-flex; gap: 3px; }
+
+#puxar { padding: 8px 14px 7px; cursor: var(--cursor-mao, grab); }
+#puxar:active { cursor: var(--cursor-punho, grabbing); }
+/* Tentou rolar com a página presa: o PUXAR pula em degraus secos. */
+#puxar.cutucado { animation: cutucar-puxar .5s step-end; }
+@keyframes cutucar-puxar {
+  20% { transform: translateY(-6px); }
+  45% { transform: translateY(-3px); }
+  65% { transform: translateY(-5px); }
+  85% { transform: translateY(-2px); }
+}
+
+/* ---------- apresentação e rodapé ---------- */
+
+.apresentacao { position: absolute; z-index: 3; left: 5vw; bottom: 9%; }
+.apresentacao-titulo {
+  margin: 18px 0 20px;
+  font: 400 clamp(25px, 2.5vw, 42px)/1.1 var(--fonte-display); letter-spacing: -.8px; color: var(--tinta);
+}
+.apresentacao-titulo em { font-style: normal; }
+/* Inline de propósito: o espaço entre as linhas vem da linha do aside (16 px), como no original (~22 px). */
+.apresentacao-texto { font-size: 11px; line-height: 1.8; color: var(--texto-3); }
+
+.abertura-rodape {
+  position: absolute; z-index: 5; bottom: 28px; left: var(--margem-larga); right: var(--margem-larga);
+  display: flex; justify-content: flex-end; pointer-events: none;
+}
+.descer {
+  display: inline-flex; align-items: center; gap: 16px; padding: 10px 0;
+  font-size: 8px; letter-spacing: 1.3px; color: var(--texto-fraco); text-decoration: none;
+  pointer-events: auto; transition: opacity .8s, visibility .8s;
+}
+.descer > span { display: inline-block; font-size: 18px; letter-spacing: 0; transition: transform .25s; }
+.descer:hover > span { transform: translateY(4px); }
+/* Enquanto a página está presa, o atalho para baixo não aparece. */
+html.rolagem-presa .descer { opacity: 0; visibility: hidden; }
+
+/* ---------- telas menores ---------- */
+
+@media (max-width: 1050px) {
+  .cabecalho-nota { display: none; }
+  .busto { height: 100%; bottom: -3.8%; }
+  .apresentacao { left: 3.5vw; }
+  .apresentacao-texto { font-size: 10px; }
+}
+
+@media (max-width: 760px) {
+  .abertura { min-height: 680px; }
+  .cabecalho { left: 22px; right: 22px; height: 70px; }
+  .assinatura { font-size: 16px; }
+  .busto { height: 78%; bottom: -3.3%; }
+  .apresentacao { top: 23%; bottom: auto; left: 24px; }
+  .apresentacao .rotulo, .apresentacao-texto { display: none; }
+  .apresentacao-titulo { margin: 0 0 8px; font: 400 17px/1.1 var(--fonte-texto); letter-spacing: -.5px; }
+  .ajuda { top: calc(23% + 64px); }
+  .abertura-rodape { left: 20px; right: 20px; bottom: 15px; }
+  .descer { font-size: 7px; gap: 7px; }
+}
+
+@media (max-width: 370px) {
+  .assinatura { font-size: 14px; }
+  .apresentacao { left: 18px; }
+  .apresentacao-titulo { font-size: 15px; }
+}
+
+/* Movimento reduzido: sem prólogo, a cena já está no lugar. */
+@media (prefers-reduced-motion: reduce) {
+  .cena { transform: none; }
+}
