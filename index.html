@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/projetos.css">
   <link rel="stylesheet" href="css/ano.css">
   <link rel="stylesheet" href="css/arena.css">
+  <link rel="stylesheet" href="css/contato.css">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -253,6 +254,65 @@
     </div>
   </section>
   <!-- /seção: arena -->
+
+  <!-- seção: contato (dono: contato) -->
+  <section class="tela contato" id="contato" aria-labelledby="contato-titulo">
+    <svg class="campo" id="campo" aria-hidden="true"></svg>
+    <canvas class="campo-fx pixel" id="campo-fx" aria-hidden="true"></canvas>
+    <div class="contato-cabeca">
+      <h2 id="contato-titulo">Contato</h2>
+      <p>Escolha uma porta.</p>
+    </div>
+    <!-- Uma casa por canal. data-tipo é o prédio (lugar, tamanho e vez na ronda do mascote); data-nome é o nome entalhado
+         no arquitrave e data-simbolo o relevo (js/arte/casas.js). O desenho de cada casa leva ao link do papel: para
+         trocar um canal, troque o papel e esses dois atributos. Sem script, os papéis ficam numa fileira no pé da tela. -->
+    <ul class="casas" id="casas">
+      <li class="casa" data-tipo="tesouro" data-nome="E-MAIL" data-simbolo="envelope">
+        <a class="casa-arte" tabindex="-1" aria-hidden="true"><svg></svg></a>
+        <div class="casa-pergaminho">
+          <canvas class="casa-canvas pixel" aria-hidden="true"></canvas>
+          <div class="casa-papel">
+            <span class="casa-rede">E-mail</span>
+            <span class="casa-linha"><a id="contato-email" href="mailto:victor.dev.nascimento@gmail.com">victor.dev.nascimento<wbr>@gmail.com</a><button class="botao-copiar" id="copiar-email" type="button" aria-label="Copiar o e-mail">copiar</button></span>
+          </div>
+        </div>
+      </li>
+      <li class="casa" data-tipo="tholos" data-nome="GITHUB" data-simbolo="github">
+        <a class="casa-arte" tabindex="-1" aria-hidden="true"><svg></svg></a>
+        <div class="casa-pergaminho">
+          <canvas class="casa-canvas pixel" aria-hidden="true"></canvas>
+          <div class="casa-papel">
+            <span class="casa-rede">GitHub</span>
+            <span class="casa-linha"><a href="https://github.com/VictorNascimento14" target="_blank" rel="noopener noreferrer">@Victor<wbr>Nascimento14<span class="sr-only"> (abre em nova aba)</span></a></span>
+          </div>
+        </div>
+      </li>
+      <li class="casa" data-tipo="teatro" data-nome="WHATSAPP" data-simbolo="whatsapp">
+        <a class="casa-arte" tabindex="-1" aria-hidden="true"><svg></svg></a>
+        <div class="casa-pergaminho">
+          <canvas class="casa-canvas pixel" aria-hidden="true"></canvas>
+          <div class="casa-papel">
+            <span class="casa-rede">WhatsApp</span>
+            <!-- O número vem de js/dados/perfil.js (whatsapp). Sem ele, "em breve" e nada de link (nem no desenho da casa);
+                 com ele, o script troca esta linha pelo link "Mandar mensagem". -->
+            <span class="casa-linha" id="contato-whatsapp">em breve</span>
+          </div>
+        </div>
+      </li>
+      <li class="casa" data-tipo="stoa" data-nome="LINKEDIN" data-simbolo="linkedin">
+        <a class="casa-arte" tabindex="-1" aria-hidden="true"><svg></svg></a>
+        <div class="casa-pergaminho">
+          <canvas class="casa-canvas pixel" aria-hidden="true"></canvas>
+          <div class="casa-papel">
+            <span class="casa-rede">LinkedIn</span>
+            <span class="casa-linha"><a href="https://www.linkedin.com/in/--dev-victor-nascimento" target="_blank" rel="noopener noreferrer">Victor Nascimento<span class="sr-only"> (abre em nova aba)</span></a></span>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <p class="credito">Inspirado em <a href="https://ofelipemart.gevia.co/" target="_blank" rel="noopener noreferrer">ofelipemart<span class="sr-only"> (abre em nova aba)</span></a>.<br>Código e arte próprios.</p>
+  </section>
+  <!-- /seção: contato -->
 
   </main>
   <noscript><link rel="stylesheet" href="css/sem-js.css"></noscript>
