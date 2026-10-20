@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#20](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/20) — docs: README do portfólio · [nota](prs/2026-10-20-pr-20-readme.md)
 - [#19](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/19) — feat(duelo): o palco do duelo de cartas no Coliseu · [nota](prs/2026-10-20-pr-19-duelo-palco.md)
 - [#18](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/18) — feat(duelo): cenas dos 16 golpes especiais · [nota](prs/2026-10-20-pr-18-duelo-golpes.md)
 - [#17](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/17) — feat(duelo): regras, 96 cartas e IA de três níveis · [nota](prs/2026-10-20-pr-17-duelo-regras.md)
