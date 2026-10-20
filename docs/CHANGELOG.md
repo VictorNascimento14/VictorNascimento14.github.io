@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#16](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/16) — feat(admin): área restrita com o Tetris de mármore · [nota](prs/2026-10-20-pr-16-admin.md)
 - [#15](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/15) — feat(jogos): cabo de guerra no Coliseu · [nota](prs/2026-10-20-pr-15-cabo-de-guerra.md)
 - [#14](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/14) — feat(jogos): jogo da luz com as cinco caixas · [nota](prs/2026-10-20-pr-14-copinhos.md)
 - [#13](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/13) — feat(jogos): jogo da velha na laje de mármore · [nota](prs/2026-10-20-pr-13-jogo-da-velha.md)
