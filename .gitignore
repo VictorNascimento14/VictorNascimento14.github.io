@@ -1,0 +1,11 @@
+node_modules/
+.DS_Store
+*.log
+/tmp/
+# Capturas de verificação geradas pelos scripts de tools/
+/capturas/
+# Originais das imagens (PNG grandes); o site usa os WebP gerados por tools/imagens.py
+/assets/img/originais/
+
+# Engenharia reversa do original: uso interno (cita conteúdo de terceiros)
+/docs/engenharia-reversa/
