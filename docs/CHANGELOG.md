@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#18](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/18) — feat(duelo): cenas dos 16 golpes especiais · [nota](prs/2026-10-20-pr-18-duelo-golpes.md)
 - [#17](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/17) — feat(duelo): regras, 96 cartas e IA de três níveis · [nota](prs/2026-10-20-pr-17-duelo-regras.md)
 - [#16](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/16) — feat(admin): área restrita com o Tetris de mármore · [nota](prs/2026-10-20-pr-16-admin.md)
 - [#15](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/15) — feat(jogos): cabo de guerra no Coliseu · [nota](prs/2026-10-20-pr-15-cabo-de-guerra.md)
