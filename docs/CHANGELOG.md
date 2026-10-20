@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#12](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/12) — feat(segredos): cutucadas, nariz, tédio, eureca, deploy e pétalas · [nota](prs/2026-10-20-pr-12-segredos.md)
 - [#11](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/11) — feat(conversa): a caixa de fala do escultor · [nota](prs/2026-10-20-pr-11-conversa.md)
 - [#10](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/10) — feat(conquistas): 25 moedas, medalheiro e metais · [nota](prs/2026-10-20-pr-10-conquistas.md)
 - [#9](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/9) — feat(contato): prado grego com quatro portas · [nota](prs/2026-10-20-pr-9-contato.md)

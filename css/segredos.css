@@ -1,0 +1,51 @@
+/* Os segredos do ateliê (js/jogos/segredos.js): a camada dos efeitos, a turma que remonta o site depois do
+   terremoto, a pedra sobre o busto (o nariz quebrado e a inscrição do tédio), o sino e a etiqueta das pétalas.
+   Números da spec 06 §4.9 e §5.4 e da spec 08 §6. Com movimento reduzido nada disto anda: base.css desliga animações
+   e transições, e o script troca cada efeito pelo estado final. */
+
+/* Faíscas, lascas e o pedaço do nariz: um canvas fixo na tela inteira, em px de dispositivo, sem eventos. */
+.segredos-fx { position: fixed; left: 0; top: 0; z-index: var(--z-efeitos); pointer-events: none; }
+.segredos-fx[hidden] { display: none; }
+
+/* A turma do terremoto: aprendizes de pixel 2 por cima dos efeitos, também sem eventos. */
+.segredos-turma { position: fixed; inset: 0; z-index: var(--z-turma); overflow: hidden; pointer-events: none; }
+.segredos-turma canvas { position: absolute; left: 0; top: 0; }
+
+/* Sobre o retrato, dentro da cena: a fratura do nariz e as letras riscadas na base. */
+.segredos-pedra { position: absolute; z-index: 1; pointer-events: none; }
+
+/* O sino: o <main> treme em degraus secos (o escultor, a medalha e o que é fixo ficam fora dele). Durante o tremor a
+   página não ganha barra de rolagem horizontal pelos 4 px que sobram. */
+html.segredos-sino { overflow-x: hidden; }
+html.segredos-sino main { animation: segredos-sino .8s step-end; }
+@keyframes segredos-sino {
+  0% { translate: 0 0; }
+  10% { translate: -4px 0; }
+  20% { translate: 4px 0; }
+  30% { translate: -3px 0; }
+  40% { translate: 3px 0; }
+  55% { translate: -2px 0; }
+  70% { translate: 1px 0; }
+  85%, 100% { translate: 0 0; }
+}
+
+/* As peças do terremoto. O script põe quanto cada uma cai e gira em translate e rotate soltos (não em transform, que
+   é de cada peça) e o atraso em --queda-atraso; aqui ficam as curvas: a queda acelera, a volta sobe em 4 degraus. */
+.segredos-caindo {
+  transition:
+    translate .75s var(--curva-queda) var(--queda-atraso, 0s),
+    rotate .75s cubic-bezier(.4, 0, .7, .4) var(--queda-atraso, 0s) !important;
+}
+.segredos-voltando { transition: translate .3s steps(4), rotate .3s steps(4) !important; }
+/* Caixa em linha não se move com translate: enquanto cai, vira bloco. */
+.segredos-em-bloco { display: inline-block; }
+
+/* A pétala pega vira uma etiqueta "n/12" acima do ponto, que sobe e some em 6 degraus. */
+.petala-pega {
+  position: absolute; z-index: 3; padding: 3px 6px; pointer-events: none; white-space: nowrap;
+  font: 700 10px/1.2 var(--fonte-pixel); letter-spacing: 1px;
+  color: var(--liga-5); background: var(--placa);
+  translate: -50% -140%;
+  animation: petala-sobe .9s steps(6) forwards;
+}
+@keyframes petala-sobe { to { translate: -50% -320%; opacity: 0; } }
