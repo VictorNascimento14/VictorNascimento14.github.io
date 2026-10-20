@@ -1,0 +1,148 @@
+/* Os jogos do site: o jogo da velha na laje do Contato, o jogo da luz nas caixas dos Projetos e o cabo de guerra na
+   areia do Coliseu (docs/arquitetura.md §10; specs 05 §4.9, 02 §4.8 e 04 §4.9). Linguagem pixel: cantos retos, sombras
+   duras e animações em degraus. Com movimento reduzido o base.css já tira animações e transições. */
+
+/* ---------- jogo da velha: a laje na grama ---------- */
+
+/* A laje do contato vira botão: sobe 2 px apontada ou com foco e mostra a etiqueta "jogo da velha?". */
+.laje.jogavel { pointer-events: auto; cursor: var(--cursor-cinzel, pointer); }
+.laje.jogavel:hover svg, .laje.jogavel:focus-visible svg { transform: translateY(-2px); }
+.laje.jogavel:focus-visible { outline: 2px solid #3b2f22; outline-offset: 4px; }
+.laje.longe { visibility: hidden; }   /* no alto, durante o jogo */
+.laje-etiqueta {
+  left: 50%; bottom: calc(100% + 8px); transform: translateX(-50%);
+  padding: 5px 8px 4px; line-height: 1;
+  opacity: 0; pointer-events: none;
+  transition: opacity .15s steps(2);
+}
+.laje.jogavel:hover .laje-etiqueta, .laje.jogavel:focus-visible .laje-etiqueta { opacity: 1; }
+
+/* ---------- jogo da velha: o palco ---------- */
+
+/* A laje alta é sempre de dia (o contato pode estar de noite) e fica abaixo do escultor, que voa por cima do véu. */
+.velha-palco {
+  --marmore: #f2ede2; --marmore-sombra: #d6c9ab; --marmore-linha: #9c8a66;
+  position: fixed; inset: 0; z-index: var(--z-jogo);
+  overscroll-behavior: contain; touch-action: none;
+}
+.velha-palco[hidden] { display: none; }
+
+.velha-veu { position: absolute; inset: 0; background: var(--px-veu-forte); animation: velha-escurecer .3s steps(3) both; }
+.velha-palco.fechando .velha-veu { animation: velha-clarear .38s steps(3) both; }
+@keyframes velha-escurecer { from { opacity: 0; } }
+@keyframes velha-clarear { to { opacity: 0; } }
+
+.velha-laje { position: absolute; left: 0; top: 0; transform-origin: 0 0; line-height: 0; }
+.velha-laje svg { display: block; overflow: visible; }
+.velha-lascas { position: absolute; pointer-events: none; }
+
+/* A linha vencedora pisca entre o ouro e o ouro claro, em degraus. */
+.lj-ouro { fill: #cc961b; }
+.velha-laje.ganhou .lj-ouro { animation: velha-brilho .8s steps(1, end) infinite; }
+@keyframes velha-brilho { 50% { fill: #fdeeab; } }
+
+.velha-casas { position: absolute; inset: 0; }
+.velha-casa { position: absolute; padding: 0; background: none; }
+.velha-casa.livre:hover { background: #2c211614; }
+.velha-casa[aria-disabled="true"] { cursor: var(--cursor-seta, default); }
+/* O anel do foco no tom do X: o ouro sobre o mármore ficava em 2,3:1, abaixo dos 3:1 que a WCAG pede para o foco. */
+.velha-casa:focus-visible { outline: 2px solid #3a2b1b; outline-offset: -3px; }
+
+/* Placar, dica e "sair" abaixo da laje; entram depois dela e somem na hora ao fechar. */
+.velha-pe {
+  position: absolute; left: 0; right: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  padding: 0 16px;
+  animation: velha-escurecer .3s steps(3) .25s both;
+}
+.velha-palco.fechando .velha-pe { visibility: hidden; }
+.velha-placar {
+  margin: 0;
+  font: 600 12px/1 var(--fonte-numeral); letter-spacing: 1.8px; text-transform: uppercase;
+  color: var(--liga-4);
+}
+.velha-placar b { font-size: 18px; font-weight: 600; color: var(--liga-5); }
+.velha-dica { margin: 0; min-height: 1.3em; font: 500 12px/1.3 var(--fonte-pixel); color: var(--px-texto-3); text-align: center; }
+.velha-sair {
+  font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--px-texto-3); text-decoration: underline; text-underline-offset: 4px;
+}
+.velha-sair:hover { color: var(--liga-5); }
+.velha-sair:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 3px; }
+
+/* ---------- jogo da luz (as caixas dos Projetos) ---------- */
+
+/* O anel é do jogo: as setas saem de lado sem mexer o layout, o palco perde a mão de arrastar e o numeral da legenda
+   fica em bronze. Na escolha, as caixas voltam a ser clicáveis. */
+.anel.luz-ligada .anel-seta { visibility: hidden; }
+.anel.luz-ligada .anel-palco, .anel.luz-ligada .bau-tranca { cursor: var(--cursor-seta, auto); }
+.anel.luz-ligada .anel-numeral { color: var(--bronze); letter-spacing: 2px; }
+/* As falas do jogo são mais longas que os nomes das caixas: no celular quebram em duas linhas, centradas. */
+.anel.luz-ligada .anel-legenda { text-align: center; }
+.anel.luz-escolha .bau-tranca { cursor: var(--cursor-cinzel, pointer); }
+.anel.luz-escolha .bau-tranca:focus-visible { outline: 2px solid var(--bronze); outline-offset: 4px; }
+
+.luz-sair {
+  display: block; margin: 12px auto 0; padding: 6px 10px;
+  font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--texto-fraco); text-decoration: underline; text-decoration-color: var(--salvia-ponto); text-underline-offset: 4px;
+}
+.luz-sair:hover { color: var(--tinta); }
+.luz-sair[hidden] { display: none; }
+
+/* Movimento reduzido: o par que vai trocar ganha um contorno de ouro em pixel (e fica inteiro, mesmo lá no fundo). */
+.bau.luz-troca {
+  opacity: 1 !important;
+  filter: drop-shadow(2px 0 0 var(--ouro-fundo)) drop-shadow(-2px 0 0 var(--ouro-fundo))
+    drop-shadow(0 2px 0 var(--ouro-fundo)) drop-shadow(0 -2px 0 var(--ouro-fundo));
+}
+
+/* ---------- cabo de guerra (a areia do Coliseu) ---------- */
+
+/* As duas metades da corda são botões transparentes; só existem (e só entram no Tab) com a arena livre. */
+.cabo-alvos { position: absolute; inset: 0; z-index: 4; pointer-events: none; visibility: hidden; }
+.cabo-alvos.ligado { visibility: visible; }
+.cabo-metade {
+  position: absolute; padding: 0; background: none;
+  pointer-events: auto; cursor: var(--cursor-mao, grab);
+}
+.cabo-metade:active { cursor: var(--cursor-punho, grabbing); }
+.cabo-metade:focus-visible { outline: 2px dashed var(--liga-1); outline-offset: 2px; }
+/* A dica do medalheiro: o contorno tracejado pisca nas duas metades. */
+.cabo-alvos[data-dica] .cabo-metade { outline: 2px dashed var(--liga-1); outline-offset: 2px; animation: cabo-dica .5s steps(1, end) infinite; }
+@keyframes cabo-dica { 50% { outline-color: transparent; } }
+
+/* A etiqueta fica abaixo da corda, para não cobrir as pernas dos gladiadores; o rabicho aponta para cima. */
+.cabo-etiqueta { transform: translateX(-50%); pointer-events: none; }
+.cabo-etiqueta::before {
+  content: ''; position: absolute; left: 50%; top: -6px;
+  width: 6px; height: 6px; margin-left: -3px; background: var(--placa);
+}
+.cabo-etiqueta[hidden] { display: none; }
+
+/* O placar acima das cabeças; com o palco estreito (o JS põe .no-alto), no alto do muro. */
+.cabo-placar {
+  position: absolute; z-index: 5;
+  display: flex; flex-direction: column; align-items: center; gap: 9px;
+  padding: 11px 18px 12px;
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px var(--liga-0), 0 6px 0 #19141040;
+  transform: translate(-50%, -100%);
+  pointer-events: none;
+}
+.cabo-placar.no-alto { transform: translateX(-50%); }
+.cabo-placar[hidden] { display: none; }
+.cabo-sub {
+  font: 700 9px/1 var(--fonte-pixel); letter-spacing: 1.6px; text-transform: uppercase; white-space: nowrap;
+  color: var(--px-texto-3);
+}
+.cabo-grande { font: 600 clamp(30px, 3.6vw, 54px)/1 var(--fonte-numeral); color: var(--liga-5); white-space: nowrap; }
+.cabo-grande:empty { display: none; }
+.cabo-grande.vai, .cabo-grande.venceu { color: var(--ouro-vivo); }
+/* "carimbo": o número entra grande e transparente */
+.cabo-grande.batida { animation: cabo-batida .3s steps(3) both; }
+@keyframes cabo-batida { from { transform: scale(1.6); opacity: 0; } }
+.cabo-relogio { display: flex; gap: 3px; }
+.cabo-relogio .celula { width: 9px; height: 9px; }
+.cabo-placar[data-fase="fim"] .cabo-relogio { visibility: hidden; }
+
+.arena-palco.cabo-puxando { cursor: var(--cursor-punho, grabbing); }
