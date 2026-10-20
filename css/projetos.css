@@ -1,0 +1,241 @@
+/* Projetos: o pórtico (cornija com dentículos, colunas jônicas cortadas pela borda da janela, piso), o anel de
+   caixas de bronze e o cartão que sobe de dentro da caixa. Spec 02 (§3.4–§4.10) e spec 08 §3.2.
+   O script escreve --palco-h, --folga-acima, --folga-abaixo (no palco), --cartao-l (no anel), --subida-s e
+   --subida-y (no cartão) e posiciona cada caixa (translate, z-index, opacidade). */
+
+/* ---------- o pórtico ---------- */
+/* Arquitetura desenhada como o letreiro: sálvia chapada, sem contorno; os cortes (caneluras, óvulos, frestas) na cor
+   do papel. Verticais grossas, horizontais finas. */
+
+.portico {
+  --coluna-l: clamp(240px, 20vw, 330px);
+  --cornija-h: 86px;
+  --piso-h: 30px;
+  --respiro: 64px;
+  --cartao-fechar-fundo: #ecece4e6;
+  overflow: clip;
+  isolation: isolate;   /* o anel empilha z de −4 a 26 lá dentro sem vazar para a página */
+}
+
+.cornija, .piso, .coluna { position: absolute; pointer-events: none; }
+.cornija svg, .piso svg, .coluna svg { fill: var(--salvia-letreiro); color: var(--papel); }
+
+.cornija { top: 0; left: 0; right: 0; height: var(--cornija-h); }
+.piso { bottom: 0; left: 0; right: 0; height: var(--piso-h); }
+.cornija svg, .piso svg { width: 100%; height: 100%; }
+
+/* O eixo de cada coluna é a borda da janela: só a metade de dentro aparece. */
+.coluna {
+  top: var(--cornija-h); bottom: var(--piso-h);
+  width: var(--coluna-l);
+  display: flex; flex-direction: column;
+}
+.coluna-esquerda { left: calc(var(--coluna-l) / -2); }
+.coluna-direita { right: calc(var(--coluna-l) / -2); }
+.coluna svg { width: 100%; flex: none; position: relative; z-index: 1; }
+.coluna .capitel { aspect-ratio: 200 / 84; }
+.coluna .base { aspect-ratio: 200 / 62; }
+/* só o fuste estica, e invade 3 px em cima e embaixo para não deixar emenda */
+.coluna .fuste { flex: 1 1 auto; min-height: 0; margin: -3px 0; z-index: 0; }
+
+/* ---------- a seção ---------- */
+
+.projetos {
+  position: relative;
+  min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: center;
+  width: calc(100% - 340px); max-width: 1120px; margin: 0 auto;
+  padding: calc(var(--cornija-h) + var(--respiro)) 0 calc(var(--piso-h) + var(--respiro));
+  scroll-margin-top: 24px;
+}
+
+.titulo-galeria {
+  margin: 0 0 34px;
+  text-align: center;
+  font-family: var(--fonte-display); font-weight: 400;
+  font-size: 48px; line-height: 1.1; letter-spacing: -1.8px;
+  color: var(--tinta);
+  transition: opacity .3s;
+}
+.titulo-galeria .ponto { color: var(--salvia-titulo); }
+/* o cartão aberto pode cobrir o título (que some), nunca a cornija */
+.projetos.cartao-sobre-titulo .titulo-galeria { opacity: 0; }
+
+/* ---------- o anel ---------- */
+/* .anel e .anel-palco são relativos e sem z-index: o cartão aberto (na caixa de z 21) passa por cima do título. */
+
+.anel { position: relative; }
+
+.anel-palco {
+  position: relative;
+  height: var(--palco-h, 285px);
+  margin: var(--folga-acima, 0px) 0 var(--folga-abaixo, 0px);
+  transition: margin .45s var(--curva-gaveta);
+  touch-action: pan-y;
+  user-select: none; -webkit-user-select: none;
+  cursor: var(--cursor-mao, grab);
+}
+
+.bau { position: absolute; left: 0; top: 0; }
+.bau canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+/* a tampa e a boca atrás, o cartão no meio, o corpo na frente, a tranca (botão invisível) por cima de tudo */
+.bau-tras { z-index: 0; }
+.bau-revelacao {
+  position: absolute; z-index: 1;
+  width: var(--cartao-l, 640px);
+  user-select: text; -webkit-user-select: text;
+  cursor: var(--cursor-seta, auto);
+}
+.bau-frente { z-index: 2; }
+.bau-tranca {
+  position: absolute; z-index: 3;
+  padding: 0; border: 0; background: none;
+}
+.bau-tranca:focus-visible { outline: 2px solid var(--bronze); outline-offset: 8px; }
+/* assentado, o cartão vem para cima de tudo da caixa, inclusive da tranca */
+.bau.assentada .bau-revelacao { z-index: 4; }
+/* subindo ou afundando, a caixa do cartão termina na borda da frente: o resto fica "atrás da parede" */
+.bau.abrindo .bau-revelacao, .bau.fechando .bau-revelacao { overflow: hidden; }
+.bau.abrindo .cartao { animation: subir-cartao .9s linear both; }
+.bau.fechando .cartao { animation: afundar-cartao .5s linear both; }
+
+/* Sobe estreito e dourado; só alarga depois de sair da boca. Afundando, encolhe primeiro e depois desce. */
+@keyframes subir-cartao {
+  0% {
+    transform: translateY(var(--subida-y, 100%)) scale(var(--subida-s, .25));
+    filter: brightness(1.8) sepia(.5);
+    animation-timing-function: cubic-bezier(.3, .7, .4, 1);
+  }
+  42% {
+    transform: translateY(0) scale(var(--subida-s, .25));
+    filter: brightness(1.6) sepia(.4);
+    animation-timing-function: cubic-bezier(.2, .8, .25, 1);
+  }
+  100% { transform: none; filter: none; }
+}
+@keyframes afundar-cartao {
+  0% { transform: none; filter: none; animation-timing-function: cubic-bezier(.5, 0, .8, .5); }
+  50% {
+    transform: translateY(0) scale(var(--subida-s, .25));
+    filter: brightness(1.5) sepia(.35);
+    animation-timing-function: cubic-bezier(.5, 0, .75, .4);
+  }
+  100% { transform: translateY(var(--subida-y, 100%)) scale(var(--subida-s, .25)); filter: brightness(1.8) sepia(.5); }
+}
+
+/* ---------- o cartão ---------- */
+
+.cartao {
+  position: relative;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  min-width: 0;
+  padding: 12px;
+  transform-origin: 50% 100%;   /* base central: sai da boca */
+  background: var(--cartao-caixa);
+  border: 1px solid var(--cartao-caixa-borda);
+  box-shadow: inset 0 0 0 1px var(--cartao-caixa-filete), var(--cartao-caixa-sombra);
+  transition: box-shadow .35s;
+}
+.bau.abrindo .cartao, .bau.fechando .cartao { box-shadow: inset 0 0 0 1px var(--cartao-caixa-filete), 0 26px 60px -30px #3a2b1b00; }
+.cartao:focus { outline: none; }
+
+.cartao-conteudo { display: flex; flex-direction: column; min-width: 0; padding: 20px 30px 6px 26px; }
+.cartao h3 { margin: 0 0 11px; font-weight: 500; font-size: 19px; line-height: 1.3; letter-spacing: -.5px; color: var(--tinta); }
+.cartao p { margin: 0; max-width: 46ch; font-size: 13px; line-height: 1.75; color: var(--texto-2); }
+.cartao .cartao-link { margin-top: 12px; font-size: 11px; }
+.cartao-link a { text-decoration: underline; text-decoration-color: var(--sublinhado); text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.cartao-link .seta { margin-left: 4px; }
+
+.cartao-historia { margin-top: auto; padding-top: 26px; }
+.cartao-historia summary {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  min-height: 23px;
+  font-size: 11px; color: var(--resumo);
+  list-style: none;
+}
+.cartao-historia summary::-webkit-details-marker { display: none; }
+.cartao-historia summary:focus-visible { outline: 2px solid var(--bronze); outline-offset: 5px; }
+.historia-chamada { display: inline-flex; align-items: center; gap: 10px; text-align: right; }
+.historia-mais { display: inline-block; font-size: 18px; font-weight: 300; line-height: 1; transition: transform .2s; }
+.cartao-historia[open] .historia-mais { transform: rotate(45deg); }
+.cartao-historia p { margin: 15px 0 8px; font-size: 12px; line-height: 1.8; }
+.cartao .etiqueta { font-size: 8px; letter-spacing: 1.3px; color: var(--tag); }
+
+.cartao-fechar {
+  position: absolute; top: 6px; right: 8px;
+  width: 30px; height: 30px;
+  font-size: 19px; line-height: 1; color: var(--fechar);
+}
+.cartao-fechar:hover { color: var(--tinta); }
+
+/* ---------- as capas ---------- */
+/* Tipográficas: o nome em Italiana ou Cinzel, uma cor discreta por projeto e um desenho simples em traço fino. */
+
+.capa {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  height: 212px; align-self: start;
+  overflow: hidden;
+  padding: 18px;
+  background: var(--capa-fundo); color: var(--capa-tinta);
+  text-align: center;
+}
+.capa-marca { width: 34px; height: 34px; fill: none; stroke: var(--capa-traco); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.capa-nome { font-family: var(--fonte-display); font-weight: 400; font-size: 40px; line-height: 1; letter-spacing: -1px; }
+.capa-sobre { font-size: 8px; letter-spacing: 2.2px; color: var(--capa-traco); }
+/* um filete com losango no meio, embaixo do nome */
+.capa-nome::after {
+  content: ''; display: block; width: 46px; height: 1px; margin: 14px auto 0;
+  background: linear-gradient(90deg, transparent, var(--capa-traco) 30%, var(--capa-traco) 70%, transparent);
+}
+
+.capa-processual { --capa-fundo: #353a2f; --capa-tinta: #f0efea; --capa-traco: #a7b093; }
+.capa-chat { --capa-fundo: #d6d9ce; --capa-tinta: #34382f; --capa-traco: #667359; }
+.capa-viral { --capa-fundo: #4a3820; --capa-tinta: #f8e9c2; --capa-traco: #c09760; }
+.capa-viral .capa-nome, .capa-lab .capa-nome { font-family: var(--fonte-numeral); font-weight: 600; font-size: 30px; letter-spacing: 1px; }
+.capa-decalque {
+  --capa-fundo: #f4f2ec; --capa-tinta: #34382f; --capa-traco: #91764f;
+  /* a linha de corte de um decalque */
+  outline: 1px dashed #b9bfab; outline-offset: -9px;
+}
+.capa-lab { --capa-fundo: #2b2f27; --capa-tinta: #e8cb95; --capa-traco: #91764f; }
+
+/* ---------- controles e legenda ---------- */
+
+.anel-controles { display: flex; align-items: center; justify-content: center; gap: 26px; margin-top: 22px; }
+.anel-seta { padding: 10px 14px; font-size: 17px; line-height: 1; color: var(--texto-fraco); }
+/* a seta é desenho, não glifo: a DM Sans do site não traz as setas e a fonte de reserva as deixa miúdas */
+.anel-seta svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.anel-seta:hover { color: var(--tinta); }
+.anel-legenda { display: flex; flex-direction: column; align-items: center; gap: 9px; min-width: 230px; margin: 0; }
+.anel-numeral { font-size: 8px; letter-spacing: 1.6px; color: var(--rotulo); }
+.anel-nome { font-family: var(--fonte-display); font-weight: 400; font-size: 30px; line-height: 1; letter-spacing: -.6px; color: var(--tinta); }
+
+/* ---------- larguras ---------- */
+
+@media (max-width: 1200px) {
+  .portico { --coluna-l: 200px; --cornija-h: 68px; --piso-h: 24px; }
+  .projetos { width: calc(100% - 220px); }
+}
+
+@media (max-width: 760px) {
+  .portico { --coluna-l: 88px; --cornija-h: 46px; --piso-h: 16px; --respiro: 44px; }
+  .projetos { width: calc(100% - 88px); }
+  .titulo-galeria { font-size: 40px; margin-bottom: 30px; }
+
+  /* o cartão vira uma coluna: capa em 16:9 em cima, × com fundo por cima da capa */
+  .cartao { grid-template-columns: minmax(0, 1fr); padding: 11px; }
+  .capa { height: auto; aspect-ratio: 16 / 9; }
+  .capa-nome { font-size: 38px; }
+  .capa-viral .capa-nome, .capa-lab .capa-nome { font-size: 28px; }
+  .cartao-conteudo { padding: 20px 5px 6px; }
+  .cartao h3 { font-size: 18px; }
+  .cartao p { font-size: 12px; }
+  .cartao-historia { padding-top: 22px; }
+  .cartao .etiqueta { font-size: 7px; }
+  .cartao-fechar { top: 17px; right: 17px; width: 28px; height: 28px; background: var(--cartao-fechar-fundo); }
+
+  .anel-controles { gap: 8px; }
+  .anel-legenda { min-width: 0; gap: 10px; }
+  .anel-nome { font-size: 24px; }
+}
