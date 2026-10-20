@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR" class="admin">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f0efea">
+  <meta name="robots" content="noindex">
+  <meta name="description" content="A área restrita do ateliê do Victor Nascimento. Só que não tem admin nenhum: tem um canteiro de obras.">
+  <title>Área restrita · victornascimento</title>
+  <link rel="icon" href="../assets/img/icone.svg" type="image/svg+xml">
+  <link rel="preload" href="../assets/fonts/italiana.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- O metal conquistado entra antes da primeira pintura, como no ateliê: o progresso é o mesmo. -->
+  <script>try{var m=JSON.parse(localStorage.getItem('victornascimento:metal'));if(m==='prata'||m==='ouro')document.documentElement.dataset.metal=m}catch(e){}</script>
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/conquistas.css">
+  <link rel="stylesheet" href="../css/admin.css">
+  <script type="module">
+    import { iniciar } from '../js/jogos/tetris.js';
+    iniciar();
+  </script>
+</head>
+<body>
+  <header class="admin-topo">
+    <a class="admin-voltar" href="../"><span aria-hidden="true">←</span> voltar ao ateliê</a>
+  </header>
+
+  <main class="admin-palco">
+    <!-- A porta: um login de mentira. Nada é enviado (method="dialog" fora de um <dialog> não sai do lugar), nada é
+         guardado; o script só lê o que foi digitado para escolher a fala do escultor e apaga os campos. -->
+    <section class="porta" id="porta" aria-labelledby="porta-titulo">
+      <span class="rotulo-secao">ÁREA RESTRITA</span>
+      <h1 class="titulo-secao" id="porta-titulo">Painel do ateliê<span class="ponto">.</span></h1>
+      <p class="lede">Entrada só para administradores. <span>Identifique-se</span> para continuar.</p>
+      <form class="porta-painel painel-pixel" id="porta-form" method="dialog" autocomplete="off" aria-labelledby="porta-legenda">
+        <canvas class="porta-cadeado pixel" id="cadeado" aria-hidden="true"></canvas>
+        <p class="porta-legenda" id="porta-legenda">Acesso do administrador</p>
+        <label class="porta-campo">
+          <span>Usuário</span>
+          <input id="usuario" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true">
+        </label>
+        <label class="porta-campo">
+          <span>Senha</span>
+          <input id="senha" type="password" autocomplete="off" data-1p-ignore data-lpignore="true">
+        </label>
+        <div class="porta-linha">
+          <button class="botao-pixel grande porta-entrar" id="entrar" type="submit">entrar</button>
+          <button class="porta-esqueci" id="esqueci" type="button">esqueci a senha</button>
+        </div>
+      </form>
+      <p class="porta-nota">Nada do que você digitar sai deste navegador.</p>
+      <noscript><p class="porta-nota">Sem JavaScript a porta não abre. <a class="link-sublinhado" href="../">Voltar ao ateliê</a></p></noscript>
+    </section>
+
+    <!-- A obra: o Tetris de mármore e bronze. -->
+    <section class="obra" id="obra" aria-labelledby="obra-titulo" hidden>
+      <div class="obra-texto">
+        <span class="rotulo-secao">CANTEIRO DE OBRAS</span>
+        <h1 class="titulo-secao" id="obra-titulo">Mestre de obras<span class="ponto">.</span></h1>
+        <p class="lede">Admin mesmo não tem. Tem bloco de mármore e de bronze esperando quem empilhe: fiada completa
+          racha e sai.</p>
+        <ul class="obra-teclas" id="obra-teclas" aria-label="Teclas do jogo">
+          <li><span class="obra-tecla"><kbd>←</kbd> <kbd>→</kbd></span> andar</li>
+          <li><span class="obra-tecla"><kbd>↑</kbd></span> girar</li>
+          <li><span class="obra-tecla"><kbd>↓</kbd></span> descer</li>
+          <li><span class="obra-tecla"><kbd>espaço</kbd></span> soltar</li>
+          <li><span class="obra-tecla"><kbd>P</kbd></span> pausa</li>
+        </ul>
+      </div>
+
+      <div class="obra-poco" id="obra-poco">
+        <div class="obra-tabuleiro" id="tabuleiro" tabindex="0" role="application" aria-label="Tabuleiro do Mestre de obras" aria-describedby="obra-teclas">
+          <canvas class="pixel" id="tabuleiro-canvas" aria-hidden="true"></canvas>
+        </div>
+        <div class="obra-aviso painel-pixel" id="obra-aviso">
+          <p class="obra-aviso-titulo" id="obra-aviso-titulo">Blocos no canteiro.</p>
+          <p class="obra-aviso-texto" id="obra-aviso-texto">Dez linhas, somando as partidas, valem uma medalha.</p>
+          <button class="botao-pixel grande" id="obra-acao" type="button">começar a obra</button>
+        </div>
+      </div>
+
+      <div class="obra-lado">
+        <div class="obra-proxima">
+          <span class="rotulo-secao" id="proxima-rotulo">PRÓXIMA</span>
+          <canvas class="pixel" id="proxima-canvas" role="img" aria-labelledby="proxima-rotulo proxima-nome"></canvas>
+          <span class="sr-only" id="proxima-nome"></span>
+        </div>
+        <dl class="obra-numeros">
+          <div><dt>Linhas</dt><dd id="obra-linhas">0</dd></div>
+          <div><dt>Pontos</dt><dd id="obra-pontos">0</dd></div>
+          <div><dt>Nível</dt><dd id="obra-nivel">1</dd></div>
+          <div class="obra-recorde"><dt>Recorde</dt><dd id="obra-recorde">0</dd></div>
+        </dl>
+        <button class="botao-discreto obra-pausa" id="obra-pausa" type="button" disabled>pausa</button>
+      </div>
+
+      <!-- Controles de toque: os mesmos das teclas, para o celular. Fora da ordem do Tab (o teclado tem as teclas). -->
+      <div class="obra-toque" id="obra-toque" role="group" aria-label="Controles de toque">
+        <button class="botao-pixel" type="button" tabindex="-1" data-acao="girar" aria-label="Girar">girar</button>
+        <button class="botao-pixel" type="button" tabindex="-1" data-acao="esquerda" aria-label="Andar para a esquerda">←</button>
+        <button class="botao-pixel" type="button" tabindex="-1" data-acao="descer" aria-label="Descer">↓</button>
+        <button class="botao-pixel" type="button" tabindex="-1" data-acao="direita" aria-label="Andar para a direita">→</button>
+        <button class="botao-pixel" type="button" tabindex="-1" data-acao="soltar" aria-label="Soltar de uma vez">soltar</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- O escultor e o balão dele andam pela página inteira; o que ele diz vai também para a região viva. -->
+  <div class="admin-camada" aria-hidden="true">
+    <canvas class="admin-escultor pixel" id="admin-escultor" hidden></canvas>
+    <p class="balao-pixel admin-balao" id="admin-balao" hidden></p>
+  </div>
+  <p class="sr-only" id="admin-anuncio" aria-live="polite"></p>
+</body>
+</html>
