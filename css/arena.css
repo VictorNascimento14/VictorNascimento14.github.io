@@ -1,0 +1,149 @@
+/* A arena: LinkedIn × GitHub no interior do Coliseu (spec 04; design system 08 §1.6 e §3.4).
+   No palco, de baixo para cima: o Coliseu (SVG) → as figuras, estátua e cartão (z 1) → o canvas de efeitos, areia e
+   cordas (z 2) → os gladiadores (z 3) → o que os jogos da areia acrescentarem (z 4 e 5).
+   Breakpoint próprio: 1280 (cartões ao lado das estátuas acima dele, embaixo abaixo dele; o JS usa o mesmo). */
+
+.arena {
+  /* tokens da seção */
+  --pedra: #e3d8c5; --pedra-luz: #ece4d6; --faixa: #d9ccb5; --vao: #5b4a39; --podio: #c3ad8b;
+  --areia: #e8d6b0; --anel: #dcc69a; --tinta-areia: #7a6a50; --sublinhado-areia: #b39d76;
+
+  /* conteúdo ancorado embaixo: o que sobra da tela vai para cima do título */
+  min-height: 100svh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding-top: 72px;
+}
+
+.arena-cabeca {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 16px; text-align: center;
+}
+.arena-cabeca .x { color: var(--crista); }
+.arena-cabeca .lede { text-wrap: balance; }
+.arena-sem-js { margin: 24px 0 0; display: flex; gap: 24px; }
+
+/* ---------- o palco ---------- */
+
+.arena-palco {
+  --estatua: clamp(220px, 19vw, 300px);
+  --duelo: clamp(140px, 13vw, 200px);   /* o vão do meio, onde os gladiadores duelam */
+  --numero: clamp(52px, 5.2vw, 82px);
+  position: relative;
+  margin-top: 40px;
+  /* --rivais-topo: o espaço do muro acima das estátuas, calculado pelo JS para a seção caber numa tela */
+  padding: var(--rivais-topo, 48px) 0 72px;
+  /* As figuras e os gladiadores começam fora da tela. `clip` e não `hidden`: um link focado lá fora não consegue
+     rolar o palco por dentro (com `hidden` o navegador rola o contêiner até o foco e desalinha a arena inteira). */
+  overflow: hidden;
+  overflow: clip;
+  /* Toques seguidos na areia (os jogos) não viram zoom de toque duplo. */
+  touch-action: manipulation;
+}
+
+.coliseu { position: absolute; inset: 0; width: 100%; height: 100%; stroke: none; }
+.coliseu .face { fill: var(--pedra); }
+.coliseu .podio { fill: var(--podio); }
+.coliseu .faixa { fill: var(--faixa); }
+.coliseu .vao { fill: var(--vao); }
+.coliseu .coluna { fill: var(--pedra-luz); }
+.coliseu .corte { fill: var(--papel); }
+.coliseu .areia { fill: var(--areia); }
+.coliseu .anel { fill: none; stroke: var(--anel); stroke-width: 2; }
+
+.arena-fx { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; pointer-events: none; }
+.gladiador { position: absolute; left: 0; top: 0; z-index: 3; pointer-events: none; }
+
+/* ---------- as figuras: cartão + estátua ---------- */
+
+.rivais {
+  position: relative; z-index: 1;
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: var(--duelo);
+}
+
+.rival {
+  /* Metades de largura igual, cada uma encostada no vão: o duelo fica no centro da tela mesmo quando um cartão é
+     bem mais largo que o outro (os gladiadores param a 14 px de sprite do centro). */
+  flex: 1 1 0;
+  display: flex; justify-content: flex-end; align-items: flex-end;
+  gap: clamp(24px, 2.8vw, 44px);
+  margin: 0;
+  transition: opacity .3s steps(3), visibility 0s;
+}
+/* No HTML o cartão vem antes da estátua nas duas: LinkedIn = [cartão][estátua], GitHub = [estátua][cartão]. */
+.rival-github { flex-direction: row-reverse; }
+
+.rival-estatua {
+  display: block; width: var(--estatua); height: auto;
+  filter: drop-shadow(0 12px 10px rgba(70, 50, 25, .22));
+}
+
+.rival-cartao {
+  display: flex; flex-direction: column; align-items: flex-end;
+  padding-bottom: 6px; text-align: right;
+}
+.rival-github .rival-cartao { align-items: flex-start; text-align: left; }
+
+.rival .rotulo-secao { color: var(--tinta-areia); }
+.rival-etiqueta { display: flex; gap: 14px; }
+.rival .rival-nome { color: var(--tinta); }
+.rival .rival-provisorio { color: var(--crista); }
+
+.rival-numero {
+  display: grid;
+  margin: 16px 0 12px;
+  font: 600 var(--numero)/.9 var(--fonte-numeral);
+  letter-spacing: -.01em; white-space: nowrap;
+}
+/* O valor final, invisível, na mesma célula da grade que o contador: o cartão nasce com a largura final e não pula
+   a cada dígito (no layout largo, um cartão crescendo empurraria a estátua). */
+.rival-numero::after { content: attr(data-final); visibility: hidden; }
+.rival-numero::after, .rival-contagem { grid-area: 1 / 1; }
+.rival-linkedin .rival-numero { justify-items: end; }
+
+.rival-estatisticas { display: flex; gap: 26px; margin: 24px 0 18px; }
+.rival-estatisticas div { display: flex; flex-direction: column-reverse; gap: 8px; } /* o valor em cima do rótulo */
+.rival-estatisticas dt { font-size: 10px; letter-spacing: 1.8px; color: var(--tinta-areia); }
+.rival-estatisticas dd { margin: 0; font: 600 26px/1 var(--fonte-numeral); }
+.rival-estatisticas a,
+.rival-link {
+  text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--sublinhado-areia);
+}
+.rival-estatisticas a { text-underline-offset: 5px; }
+.rival-link { font-size: 13px; text-underline-offset: 4px; }
+.rival-link .seta { margin-left: 4px; }
+
+/* Duelo de cartas (Fase 3): a areia fica só para ele. */
+.arena.duelo .rival { opacity: 0; visibility: hidden; transition: opacity .3s steps(3), visibility 0s .3s; }
+.arena.duelo .gladiador { visibility: hidden; }
+
+/* ---------- abaixo de 1280: estátua em cima, cartão embaixo ---------- */
+
+@media (max-width: 1279px) {
+  .arena-palco {
+    --duelo: clamp(84px, 18vw, 150px);
+    --estatua: min(240px, calc((100vw - 32px - var(--duelo)) / 2));
+    --numero: clamp(30px, 7vw, 60px);
+    padding-bottom: 56px;
+  }
+  .rivais { align-items: flex-start; padding: 0 16px; }
+  .rival, .rival-github {
+    flex: none; width: var(--estatua);
+    flex-direction: column; align-items: center; justify-content: flex-start;
+    gap: 24px;
+  }
+  .rival-estatua { order: -1; }
+  .rival-cartao, .rival-github .rival-cartao { align-items: center; text-align: center; }
+  .rival-etiqueta { flex-direction: column; align-items: center; gap: 6px; }
+  .rival-linkedin .rival-numero, .rival-numero { justify-items: center; }
+  .rival-estatisticas { flex-direction: column; align-items: center; gap: 16px; margin: 20px 0 16px; }
+  .rival-estatisticas div { align-items: center; }
+}
+
+@media (max-width: 760px) {
+  .arena { padding-top: 56px; }
+  .arena-palco { margin-top: 28px; }
+  .rival-estatisticas dt { font-size: 9px; letter-spacing: 1.5px; max-width: 14ch; line-height: 1.7; text-align: center; }
+  .rival-estatisticas dd { font-size: 21px; }
+  .rival-link { font-size: 12px; }
+}
