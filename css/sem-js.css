@@ -4,6 +4,10 @@
 /* Herói: sem o prólogo para arrastar o bloco, a cena fica no lugar e o busto aparece inteiro. */
 .cena { transform: none !important; }
 
+/* Ano: a placa (com o total), as estatísticas e a legenda dependem do script; ficam o cabeçalho e o link do GitHub. */
+.placa, .ano-numeros, .placa-legenda { display: none; }
+.ano-pe { justify-content: center; }
+
 /* Projetos: o anel vira uma pilha estática. Sem caixas para abrir, os cinco cartões aparecem em fluxo, um embaixo do
    outro, com a história ainda abrindo no <details>; trancas, × e controles do carrossel saem. */
 .anel-palco { height: auto !important; margin: 0 !important; display: grid; gap: 28px; cursor: auto; }

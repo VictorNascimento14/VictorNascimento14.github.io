@@ -1,0 +1,91 @@
+/* Seção "Golpe a golpe": o ano no GitHub numa placa de bronze (spec 03 §4.9; layout na spec 08 §3.3).
+   A placa, os aprendizes e as faíscas são canvas; aqui ficam o papel em volta, o total gigante e o rodapé.
+   O script escreve --placa-largura na seção (a largura da placa com a sombra) e --gravado no total. */
+
+.ano {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100svh;
+  padding: 64px var(--margem-larga) 44px;
+  overflow: clip;
+}
+.ano-cabeca { display: flex; flex-direction: column; align-items: center; text-align: center; }
+
+/* ---------- a placa ---------- */
+
+.placa { display: flex; flex-direction: column; align-items: center; margin: 34px 0 0; }
+/* As datas medem a placa, não a figura: no celular o total gigante pode ser mais largo que ela. */
+.placa-datas {
+  display: flex; justify-content: space-between;
+  width: var(--placa-largura, 100%); max-width: 100%; margin: 0 0 12px;
+}
+.placa-palco { position: relative; z-index: 1; }
+#placa-canvas.convite { cursor: var(--cursor-cinzel, pointer); }
+
+/* A dica de um dia: o balão pixel do mascote, centrado no pino com a base 10 px acima do anel; o script põe left/top no
+   centro do pino e --rabicho onde ele está, mesmo quando a dica foi empurrada para não sair da placa. */
+.placa-dica { left: 0; top: 0; white-space: nowrap; pointer-events: none; transform: translate(-50%, calc(-100% - 10px)); }
+.placa-dica[hidden] { display: none; }
+
+/* Os aprendizes, por cima da placa e da dica; entram e saem com um fade curto. */
+.aprendiz { position: absolute; left: 0; top: 0; z-index: 2; pointer-events: none; opacity: 0; transition: opacity .25s; }
+.aprendiz.dentro { opacity: 1; }
+
+/* ---------- o total ---------- */
+
+.placa-total { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+/* Os algarismos de Italiana sobem e descem: a entrelinha .542 corta a caixa no topo do mais alto e o .177em de baixo
+   devolve os que descem, então o número fica apoiado na placa como num pedestal. O recorte revela a fração já gravada,
+   da esquerda para a direita e sem transição: é golpe a golpe, não um degradê. */
+.placa-numero {
+  display: block; padding-bottom: .177em;
+  font-family: var(--fonte-display); font-weight: 400;
+  font-size: min(30vw, 31svh); line-height: .542; letter-spacing: -.03em;
+  color: var(--salvia-letreiro); white-space: nowrap; user-select: none;
+  clip-path: inset(-4% calc(100% - var(--gravado, 1) * 100%) -4% -2%);
+}
+
+/* ---------- o rodapé da placa ---------- */
+
+.ano-pe {
+  display: flex; justify-content: space-between; align-items: flex-end; gap: 24px 40px;
+  width: var(--placa-largura, 100%); max-width: 100%; margin-top: 30px;
+}
+.ano-numeros { display: flex; gap: 40px; margin: 0; }
+/* O número aparece em cima do rótulo, mas o leitor de tela lê rótulo → valor (o dt vem antes no HTML). */
+.ano-numeros > div { display: flex; flex-direction: column-reverse; gap: 10px; }
+.ano-numeros dd { margin: 0; font-family: var(--fonte-numeral); font-weight: 600; font-size: 32px; line-height: 1; }
+.ano-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
+.ano-link { font-size: 13px; }
+
+/* A legenda é uma tira da placa: os cinco níveis dos pinos, com o mesmo bisel (luz em cima e à esquerda). */
+.placa-legenda { display: flex; align-items: center; gap: 10px; }
+.legenda-cravos {
+  display: flex; gap: 2px; padding: 3px;
+  background: var(--placa-campo); box-shadow: 0 0 0 1px var(--liga-0);
+}
+.legenda-cravos i {
+  width: 12px; height: 12px;
+  background: var(--corpo); box-shadow: inset 2px 2px 0 var(--luz), inset -2px -2px 0 var(--sombra);
+}
+.legenda-cravos i:nth-child(1) { --corpo: var(--cravo-0); --luz: var(--cravo-0-luz); --sombra: var(--cravo-0-sombra); }
+.legenda-cravos i:nth-child(2) { --corpo: var(--liga-2); --luz: var(--liga-3); --sombra: var(--liga-1); }
+.legenda-cravos i:nth-child(3) { --corpo: var(--liga-3); --luz: var(--liga-4); --sombra: var(--liga-2); }
+.legenda-cravos i:nth-child(4) { --corpo: var(--liga-4); --luz: var(--liga-5); --sombra: var(--liga-3); }
+.legenda-cravos i:nth-child(5) { --corpo: var(--liga-5); --luz: var(--liga-6); --sombra: var(--liga-4); }
+
+/* Sem dados: ficam o cabeçalho e o link, centrado. */
+.ano.sem-dados .placa, .ano.sem-dados .ano-numeros, .ano.sem-dados .placa-legenda { display: none; }
+.ano.sem-dados .ano-pe { justify-content: center; }
+
+@media (max-width: 760px) {
+  .ano { padding: 54px 16px 34px; }
+  .placa { margin-top: 30px; }
+  .placa-numero { font-size: min(40vw, 24svh); }
+  .ano-pe { flex-direction: column; align-items: center; gap: 28px; margin-top: 32px; }
+  .ano-numeros { gap: 22px; }
+  .ano-numeros > div { align-items: center; text-align: center; }
+  /* Rótulos em duas linhas; o mínimo do conteúdo vence o máximo, então "CONTRIBUIÇÃO" nunca vaza da coluna. */
+  .ano-numeros dt { max-width: 10ch; min-width: min-content; line-height: 1.7; }
+  .ano-numeros dd { font-size: 26px; }
+  .ano-meta { align-items: center; }
+}

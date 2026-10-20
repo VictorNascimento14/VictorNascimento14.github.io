@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="css/base.css">
   <link rel="stylesheet" href="css/heroi.css">
   <link rel="stylesheet" href="css/projetos.css">
+  <link rel="stylesheet" href="css/ano.css">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
@@ -203,6 +204,36 @@
     </section>
   </div>
   <!-- /seção: projetos -->
+
+  <!-- seção: ano (dono: ano) -->
+  <section class="tela ano" id="ano" aria-labelledby="ano-titulo">
+    <div class="ano-cabeca">
+      <span class="rotulo-secao"><span data-ano>2026</span> NO GITHUB</span>
+      <h2 class="titulo-secao" id="ano-titulo">Golpe a golpe<span class="ponto">.</span></h2>
+      <p class="lede">Cada pino é um dia de <span data-ano>2026</span> no GitHub. Quanto mais ele brilha, mais trabalho saiu da pedra. Os encaixes vazios esperam o golpe.</p>
+    </div>
+    <figure class="placa" id="placa">
+      <div class="placa-datas rotulo-secao" aria-hidden="true"><span id="placa-de"></span><span id="placa-ate"></span></div>
+      <div class="placa-palco" id="placa-palco">
+        <canvas class="pixel" id="placa-canvas" role="img" aria-label="Contribuições de Victor no GitHub em 2026."></canvas>
+        <span class="placa-dica balao-pixel" id="placa-dica" aria-hidden="true" hidden></span>
+      </div>
+      <figcaption class="placa-total"><span class="placa-numero" id="placa-total"></span> <span class="rotulo-secao">CONTRIBUIÇÕES EM <span data-ano>2026</span></span></figcaption>
+    </figure>
+    <div class="ano-pe">
+      <dl class="ano-numeros">
+        <div><dt class="rotulo-secao">DIAS COM CONTRIBUIÇÃO</dt><dd id="ano-dias"></dd></div>
+        <div><dt class="rotulo-secao">DIAS SEGUIDOS</dt><dd id="ano-seguidos"></dd></div>
+        <div><dt class="rotulo-secao">NUM SÓ DIA</dt><dd id="ano-recorde"></dd></div>
+      </dl>
+      <div class="ano-meta">
+        <span class="placa-legenda rotulo-secao" aria-hidden="true">MENOS <span class="legenda-cravos"><i></i><i></i><i></i><i></i><i></i></span> MAIS</span>
+        <a class="ano-link link-sublinhado" href="https://github.com/VictorNascimento14" target="_blank" rel="noopener noreferrer">github.com/VictorNascimento14<span class="seta" aria-hidden="true">↗</span><span class="sr-only"> (abre em nova aba)</span></a>
+      </div>
+    </div>
+    <ul class="sr-only" id="ano-meses" aria-label="Contribuições por mês"></ul>
+  </section>
+  <!-- /seção: ano -->
 
   </main>
   <noscript><link rel="stylesheet" href="css/sem-js.css"></noscript>
