@@ -1,0 +1,15 @@
+{
+  "name": "victornascimento",
+  "private": true,
+  "type": "module",
+  "description": "Portfólio do Victor Nascimento: um ateliê de mármore e bronze em HTML, CSS e JavaScript puro.",
+  "scripts": {
+    "dev": "python3 -m http.server 5173",
+    "lint": "node tools/checar.mjs",
+    "test": "node --test",
+    "contribuicoes": "node tools/contribuicoes.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.59.1"
+  }
+}
