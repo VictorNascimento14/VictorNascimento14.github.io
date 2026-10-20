@@ -1,0 +1,234 @@
+/* Base do ateliê: fontes, tokens, tipografia, a linguagem pixel e o que é de todas as seções.
+   Cada seção tem a sua folha (heroi, projetos, ano, arena, contato). Breakpoints usados no site:
+   1280 (arena) · 1200/761 (pórtico) · 1050 · 760 · 560 · 520 · 370. */
+
+@font-face { font-family: 'Italiana'; src: url('../assets/fonts/italiana.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'DM Sans'; src: url('../assets/fonts/dm-sans.woff2') format('woff2'); font-weight: 100 1000; font-style: normal; font-display: swap; }
+/* As setas (← ↑ → ↓ ↖ ↗ ↘ ↙) ficam fora do subconjunto latino: um arquivo mínimo só com elas. */
+@font-face { font-family: 'DM Sans'; src: url('../assets/fonts/dm-sans-setas.woff2') format('woff2'); font-weight: 100 1000; font-style: normal; font-display: swap; unicode-range: U+2190-2193, U+2196-2199; }
+@font-face { font-family: 'Cinzel'; src: url('../assets/fonts/cinzel.woff2') format('woff2'); font-weight: 400 700; font-style: normal; font-display: swap; }
+
+:root {
+  /* papel e tinta */
+  --papel: #f0efea; --tinta: #34382f; --bronze: #91764f; --selecao: #d6ceba;
+  --salvia-letreiro: #d6d9ce; --salvia-ponto: #c5caba; --salvia-titulo: #929d80;
+
+  /* texto sobre o papel: o original usa tons mais claros (2,4 a 4,4:1); aqui todos passam de 4,5:1, mesmo matiz */
+  --texto-2: #686f5c; --texto-3: #686f5e; --rotulo: #676f5d; --rotulo-nota: #696e60;
+  --texto-fraco: #676f5e; --tag: #637151; --resumo: #637057; --fechar: #686f5e; --sublinhado: #a7b093;
+
+  /* cartão de projeto */
+  --cartao: #e8e9e1; --cartao-borda: #d4d6cb;
+  --cartao-caixa: #ecece4; --cartao-caixa-borda: #cdbf9f; --cartao-caixa-filete: #f3e6c8;
+  --cartao-caixa-sombra: 0 26px 60px -30px #3a2b1b88;
+
+  /* linguagem pixel: cores que não mudam com o metal */
+  --px-contorno: #191410; --px-texto: #f2eadc; --px-texto-2: #d9cfbd; --px-texto-3: #b5a990;
+  --px-apagado: #8b8273; --px-link: #f0c987; --px-veu: #191410a6; --px-veu-forte: #191410d1;
+  --crista: #a8432c; --ouro-vivo: #ecc145; --ouro-fundo: #cc961b; --ouro-claro: #fdeeab;
+  --tinta-campo: #3b2f22;
+
+  /* metal: bronze aqui; prata e ouro em html[data-metal] */
+  --liga-0: #3a2b1b; --liga-1: #5c4427; --liga-2: #8d6a3b; --liga-3: #c09760;
+  --liga-4: #e8cb95; --liga-5: #f8e9c2; --liga-6: #fffaf0;
+  --liga-sobre: #f8e9c2; --liga-hover: #9a7644;
+  --placa: #292319; --placa-funda: #1f1a13; --placa-poco: #1d1812; --placa-campo: #2c2116;
+  --placa-bisel: #4d3a24; --placa-relevo: #33291d; --placa-ergue: #46351f;
+  --placa-linha: #231d15; --placa-linha-hover: #2c2419;
+  --cravo-0: #46351f; --cravo-0-luz: #4f3c24; --cravo-0-sombra: #36281a;
+
+  /* tipografia */
+  --fonte-display: 'Italiana', Georgia, serif;
+  --fonte-texto: 'DM Sans', sans-serif;
+  --fonte-numeral: 'Cinzel', Georgia, serif;
+  --fonte-pixel: ui-monospace, Consolas, monospace;
+  --medida-leitura: 46ch;
+
+  /* layout */
+  --margem-larga: 3.4vw; --cabecalho-h: 83px;
+
+  /* movimento */
+  --curva-gaveta: cubic-bezier(.2, .7, .2, 1);
+  --curva-queda: cubic-bezier(.55, 0, .85, .45);
+
+  /* camadas fixas */
+  --z-jogo: 18; --z-escultor: 20; --z-marca: 21; --z-conversa: 22;
+  --z-efeitos: 25; --z-turma: 26; --z-hud: 30; --z-moedas: 31; --z-janela: 40;
+}
+
+html[data-metal="prata"] {
+  --liga-0: #2e3236; --liga-1: #5b636a; --liga-2: #939ca4; --liga-3: #c3cbd1;
+  --liga-4: #eef2f4; --liga-5: #f7fafb; --liga-6: #ffffff;
+  --liga-sobre: #202428; --liga-hover: #a3abb2;
+  --placa: #24272b; --placa-funda: #1b1e21; --placa-poco: #191b1e; --placa-campo: #272b2f;
+  --placa-bisel: #41474e; --placa-relevo: #2d3135; --placa-ergue: #3b4046;
+  --placa-linha: #202326; --placa-linha-hover: #2a2e32;
+  --cravo-0: #3b4045; --cravo-0-luz: #454b51; --cravo-0-sombra: #2f3337;
+}
+
+html[data-metal="ouro"] {
+  --liga-0: #5a3b0b; --liga-1: #986810; --liga-2: #cc961b; --liga-3: #ecc145;
+  --liga-4: #fdeeab; --liga-5: #fff6cf; --liga-6: #fffdf3;
+  --liga-sobre: #3b2606; --liga-hover: #d9a427;
+  --placa: #2a2213; --placa-funda: #201a0d; --placa-poco: #1d170b; --placa-campo: #2e2410;
+  --placa-bisel: #54401a; --placa-relevo: #342915; --placa-ergue: #4a3a18;
+  --placa-linha: #241c0e; --placa-linha-hover: #2e2513;
+  --cravo-0: #4d3a14; --cravo-0-luz: #584318; --cravo-0-sombra: #3c2d0f;
+}
+
+/* ---------- página ---------- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;
+  scrollbar-gutter: stable;
+  cursor: var(--cursor-seta, auto);
+}
+html.rolagem-presa { overflow: hidden; }
+html.deslizando { scroll-snap-type: none; scroll-behavior: auto; }
+html.arrastando-anel, html.arrastando-anel * { cursor: var(--cursor-punho, grabbing) !important; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font-family: var(--fonte-texto);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--selecao); }
+
+main > .tela { scroll-snap-align: start; scroll-snap-stop: always; position: relative; }
+
+img, canvas, svg { display: block; }
+canvas.pixel, .pixel canvas { image-rendering: pixelated; }
+
+a { color: inherit; }
+a[href], button, summary, [role="button"] { cursor: var(--cursor-cinzel, pointer); }
+button {
+  font: inherit; color: inherit; background: none; border: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+button:disabled { cursor: var(--cursor-seta, default); opacity: .45; }
+
+:focus-visible { outline: 2px solid var(--bronze); outline-offset: 5px; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* svg de ícone: traço fino, sem preenchimento */
+.icone { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linecap: round; stroke-linejoin: round; }
+.icones-definidos { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- tipografia da parte clara ---------- */
+
+.rotulo { font-size: 8px; letter-spacing: 1.4px; color: var(--rotulo); font-weight: 400; }
+.rotulo-secao { font-size: 10px; letter-spacing: 1.8px; color: var(--rotulo); font-weight: 400; }
+
+.titulo-secao {
+  margin: 18px 0 14px;
+  font-family: var(--fonte-display); font-weight: 400;
+  font-size: 52px; line-height: 1.1; letter-spacing: -1.9px;
+  color: var(--tinta);
+}
+.titulo-secao > .ponto { color: var(--salvia-titulo); }
+
+.lede {
+  margin: 0; max-width: var(--medida-leitura);
+  font-size: 16px; line-height: 1.65; color: var(--texto-2); text-align: center;
+}
+
+.link-sublinhado {
+  color: var(--tinta); text-decoration: underline; text-decoration-color: var(--sublinhado);
+  text-underline-offset: 4px; text-decoration-thickness: 1px;
+}
+.link-sublinhado .seta { margin-left: 4px; }
+
+@media (max-width: 760px) {
+  .rotulo { font-size: 6px; letter-spacing: 1px; }
+  .rotulo-secao { font-size: 9px; letter-spacing: 1.5px; }
+  .titulo-secao { font-size: 42px; margin: 16px 0 12px; }
+  .lede { font-size: 14px; max-width: 32ch; }
+}
+
+/* ---------- a linguagem pixel ---------- */
+/* Cantos retos, sombras duras, animações em degraus. Tudo lê os tokens de metal. */
+
+.painel-pixel {
+  background: var(--placa); color: var(--px-texto);
+  box-shadow: 0 0 0 2px var(--px-contorno), inset 0 0 0 2px var(--liga-0);
+}
+
+.botao-pixel {
+  position: relative; top: -2px;
+  padding: 7px 12px 6px;
+  font-family: var(--fonte-pixel); font-weight: 700; font-size: 10px; line-height: 1.1;
+  letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--liga-sobre); background: var(--liga-2);
+  box-shadow:
+    inset 2px 2px 0 var(--liga-3), inset -2px -2px 0 var(--liga-1),
+    0 0 0 2px var(--px-contorno), 0 3px 0 2px var(--px-contorno);
+}
+.botao-pixel:hover { background: var(--liga-hover); }
+.botao-pixel:active {
+  top: 1px;
+  box-shadow: inset 2px 2px 0 var(--liga-1), inset -2px -2px 0 var(--liga-3), 0 0 0 2px var(--px-contorno);
+}
+.botao-pixel:disabled { opacity: .4; top: 0; }
+.botao-pixel:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 5px; }
+.botao-pixel.grande { font-size: 11px; line-height: 1; letter-spacing: 2px; padding: 9px 14px 8px; }
+.botao-pixel.pequeno { font-size: 9px; line-height: 1; letter-spacing: 1.5px; padding: 5px 8px 4px; }
+
+.botao-discreto {
+  padding: 6px 10px;
+  font-family: var(--fonte-pixel); font-weight: 700; font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--liga-4); background: var(--liga-0);
+  box-shadow: inset 2px 2px 0 var(--placa-bisel), inset -2px -2px 0 var(--placa-campo), 0 0 0 2px var(--px-contorno);
+}
+.botao-discreto:hover { background: var(--placa-ergue); }
+.botao-discreto:focus-visible { outline: 2px solid var(--liga-4); outline-offset: 3px; }
+
+.celula {
+  display: inline-block; width: 8px; height: 8px;
+  background: var(--placa-poco); box-shadow: inset 0 0 0 1px var(--liga-1);
+}
+.celula.acesa { background: var(--liga-4); box-shadow: inset -2px -2px 0 var(--liga-3); }
+
+/* balão de fala do escultor e dicas: painel sem aro, rabicho quadrado em --rabicho */
+.balao-pixel {
+  position: absolute;
+  padding: 7px 9px 8px;
+  max-width: min(250px, calc(100vw - 24px)); width: max-content;
+  font-family: var(--fonte-pixel); font-weight: 500; font-size: 12px; line-height: 1.4; text-align: left;
+  color: var(--px-texto); background: var(--placa);
+}
+.balao-pixel::after {
+  content: ''; position: absolute; top: 100%; left: var(--rabicho, 50%);
+  width: 6px; height: 6px; margin-left: -3px; background: var(--placa);
+}
+.balao-pixel a { color: var(--px-link); }
+
+.dica-pixel {
+  position: absolute; padding: 5px 7px;
+  font-family: var(--fonte-pixel); font-weight: 700; font-size: 10px; letter-spacing: 1px; white-space: nowrap;
+  color: var(--px-texto); background: var(--placa); box-shadow: 0 0 0 2px var(--px-contorno);
+}
+
+/* a onda de um metal novo passando: um flash curto em degraus */
+.fundido { animation: fundido .55s steps(4) both; }
+@keyframes fundido {
+  from { filter: brightness(2.1) saturate(.4); }
+  to { filter: none; }
+}
+
+/* ---------- movimento reduzido: nada anda ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
