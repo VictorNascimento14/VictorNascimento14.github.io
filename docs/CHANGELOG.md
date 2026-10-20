@@ -4,6 +4,7 @@ Mudanças do portfólio, da mais nova para a mais antiga. Cada entrada linka o P
 
 ## [Não lançado]
 
+- [#14](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/14) — feat(jogos): jogo da luz com as cinco caixas · [nota](prs/2026-10-20-pr-14-copinhos.md)
 - [#13](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/13) — feat(jogos): jogo da velha na laje de mármore · [nota](prs/2026-10-20-pr-13-jogo-da-velha.md)
 - [#12](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/12) — feat(segredos): cutucadas, nariz, tédio, eureca, deploy e pétalas · [nota](prs/2026-10-20-pr-12-segredos.md)
 - [#11](https://github.com/VictorNascimento14/VictorNascimento14.github.io/pull/11) — feat(conversa): a caixa de fala do escultor · [nota](prs/2026-10-20-pr-11-conversa.md)
