@@ -3,3 +3,10 @@
 .busto { opacity: 1 !important; }
 /* Herói: sem o prólogo para arrastar o bloco, a cena fica no lugar e o busto aparece inteiro. */
 .cena { transform: none !important; }
+
+/* Projetos: o anel vira uma pilha estática. Sem caixas para abrir, os cinco cartões aparecem em fluxo, um embaixo do
+   outro, com a história ainda abrindo no <details>; trancas, × e controles do carrossel saem. */
+.anel-palco { height: auto !important; margin: 0 !important; display: grid; gap: 28px; cursor: auto; }
+.bau { position: static; }
+.bau-revelacao, .bau-revelacao[hidden] { display: block; position: static; width: auto; }
+.bau-tranca, .cartao-fechar, .anel-controles { display: none; }
