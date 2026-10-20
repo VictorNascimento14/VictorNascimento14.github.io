@@ -12,6 +12,10 @@
 .placa, .ano-numeros, .placa-legenda { display: none; }
 .ano-pe { justify-content: center; }
 
+/* Contato: os papéis já ficam na fileira simples do contato.css quando o desenho não vem; sem script não há área de
+   transferência, então o botão copiar sai e fica o link do e-mail. */
+.botao-copiar { display: none; }
+
 /* Projetos: o anel vira uma pilha estática. Sem caixas para abrir, os cinco cartões aparecem em fluxo, um embaixo do
    outro, com a história ainda abrindo no <details>; trancas, × e controles do carrossel saem. */
 .anel-palco { height: auto !important; margin: 0 !important; display: grid; gap: 28px; cursor: auto; }

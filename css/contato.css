@@ -1,0 +1,176 @@
+/* Contato: o campo grego, as quatro casas e os pergaminhos de bronze (docs/arquitetura.md §7, spec 05).
+   A paleta é local à seção: o campo, as casas e a laje leem estes tokens, e .noite troca todos de uma vez.
+   Tudo plano: sem contorno, sem gradiente (o fundo de segurança é um corte seco), luz de cima à esquerda. */
+
+.contato {
+  --ceu-1: #8fb5c4; --ceu-2: #afcdd3; --ceu-3: #cfe2e0;
+  --nuvem: #f7f5ee; --nuvem-sombra: #d9e2df;
+  --monte-1: #b3c7c8; --monte-2: #9db3a7;
+  --rocha: #dcd1ba; --rocha-sombra: #beae8e;
+  --templo: #f2ede2; --templo-sombra: #b9aa88;
+  --grama-1: #c4d394; --grama-2: #a6c06e; --grama-3: #8daf58; --grama-4: #769c49; --grama-5: #62893f;
+  --ruina: #ebe3d2; --ruina-sombra: #c6b691; --ruina-linha: #b09c74;
+  --flor-branca: #fbf8ef; --flor-amarela: #efd67a; --flor-rosa: #e9a59d;
+  --trilha: #e3d5b3; --trilha-sombra: #d2c29c;
+  --marmore: #f2ede2; --marmore-sombra: #d6c9ab; --marmore-fundo: #b9aa88; --marmore-linha: #9c8a66;
+  --telha: #c58a6b; --telha-sombra: #a8705a; --pintura: #7f98a5;
+  --porta: #5b4c3b; --porta-sombra: #4a3d30; --lampada: #f3cf86; --lampada-sombra: #e2b46a;
+
+  height: 100svh; min-height: 600px; overflow: hidden;
+  color: var(--tinta-campo);
+  /* enquanto o desenho não vem: céu até 42%, grama daí para baixo */
+  background: linear-gradient(var(--ceu-2) 42%, var(--grama-3) 42%);
+}
+
+/* De madrugada (antes das 5h) o mesmo campo, à noite: as portas já acesas e um halo quente em cada casa. */
+.contato.noite {
+  --ceu-1: #141c29; --ceu-2: #1b2635; --ceu-3: #243243;
+  --nuvem: #334252; --nuvem-sombra: #2a3746;
+  --monte-1: #28363f; --monte-2: #223038;
+  --rocha: #57554a; --rocha-sombra: #434033;
+  --templo: #77756a; --templo-sombra: #555246;
+  --grama-1: #3a4730; --grama-2: #323f29; --grama-3: #2a3722; --grama-4: #232f1d; --grama-5: #1d2818;
+  --ruina: #6a685d; --ruina-sombra: #514f43; --ruina-linha: #454335;
+  --flor-branca: #a3a296; --flor-amarela: #a3935c; --flor-rosa: #8a6c67;
+  --trilha: #5b5748; --trilha-sombra: #4c483b;
+  --marmore: #86847a; --marmore-sombra: #69675c; --marmore-fundo: #535146; --marmore-linha: #444237;
+  --telha: #6b4e41; --telha-sombra: #573f35; --pintura: #46565e;
+  --porta: #f3cf86; --porta-sombra: #e2b46a; --lampada: #ffe4a6; --lampada-sombra: #f3c470;
+  color: #efe8d8;
+}
+.contato.noite .contato-cabeca p { color: #d9d2c0; }
+.contato.noite .casa-arte { filter: drop-shadow(0 0 14px #f3cf8640); }
+
+/* ---------- o campo (SVG) e as pétalas (canvas) ---------- */
+
+.campo { position: absolute; inset: 0; width: 100%; height: 100%; }
+.campo-fx { position: absolute; left: 0; top: 0; z-index: 1; pointer-events: none; }
+
+.cp-ceu { fill: var(--ceu-1); } .cp-ceu-2 { fill: var(--ceu-2); } .cp-ceu-3 { fill: var(--ceu-3); }
+.cp-brilho { fill: #fbf8ee; opacity: .35; }
+.cp-nuvem { fill: var(--nuvem); } .cp-nuvem-sombra { fill: var(--nuvem-sombra); }
+.cp-monte-1 { fill: var(--monte-1); } .cp-monte-2 { fill: var(--monte-2); }
+.cp-rocha { fill: var(--rocha); } .cp-rocha-sombra { fill: var(--rocha-sombra); }
+.cp-templo { fill: var(--templo); } .cp-templo-sombra { fill: var(--templo-sombra); }
+.cp-grama-1 { fill: var(--grama-1); } .cp-grama-2 { fill: var(--grama-2); } .cp-grama-3 { fill: var(--grama-3); }
+.cp-grama-4 { fill: var(--grama-4); } .cp-grama-5 { fill: var(--grama-5); }
+.cp-ruina { fill: var(--ruina); } .cp-ruina-sombra { fill: var(--ruina-sombra); } .cp-ruina-linha { fill: var(--ruina-linha); }
+.cp-flor-b { fill: var(--flor-branca); } .cp-flor-a { fill: var(--flor-amarela); } .cp-flor-r { fill: var(--flor-rosa); }
+.cp-trilha { fill: var(--trilha); } .cp-trilha-sombra { fill: var(--trilha-sombra); }
+
+/* As estrelas estão sempre no desenho, atrás das nuvens e dos montes; só aparecem à noite, piscando em dois degraus. */
+.cp-estrela { display: none; fill: #f7f0dc; }
+.cp-estrela .cp-estrela-halo { fill: #f7f0dc33; }
+.contato.noite .cp-estrela { display: inline; animation: cintilar 3.2s steps(2, jump-none) infinite; }
+@keyframes cintilar { to { opacity: .35; } }
+
+/* ---------- cabeçalho ---------- */
+
+.contato-cabeca { position: absolute; top: 7%; left: 0; right: 0; z-index: 2; padding: 0 16px; text-align: center; }
+.contato-cabeca h2 {
+  margin: 0;
+  font-family: var(--fonte-display); font-weight: 400; font-size: 64px; line-height: 1; letter-spacing: -1.5px;
+}
+.contato-cabeca p { margin: 10px 0 0; font-size: 15px; }
+
+/* ---------- as casas ---------- */
+/* Sem o desenho (sem script, ou se a arte falhar) os papéis ficam numa fileira centrada perto do pé da tela. Com ele
+   (.desenhadas) a lista cobre a seção e só o desenho e o pergaminho de cada casa recebem o ponteiro. */
+
+.casas {
+  position: absolute; inset: auto 0 8%; z-index: 2;
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;
+  margin: 0; padding: 0 16px; list-style: none;
+}
+.casa-arte, .casa-canvas { display: none; }
+.casa-papel { background: #ecdcb9; box-shadow: 0 0 0 4px var(--liga-2); }
+
+.casas.desenhadas { inset: 0; display: block; padding: 0; pointer-events: none; }
+.desenhadas .casa-arte { display: block; position: absolute; pointer-events: auto; }
+.desenhadas .casa-arte svg { width: 100%; height: 100%; overflow: visible; }
+.desenhadas .casa-pergaminho { position: absolute; pointer-events: auto; touch-action: manipulation; }
+.desenhadas .casa-canvas { display: block; position: absolute; pointer-events: none; }
+.desenhadas .casa-papel { background: none; box-shadow: none; }
+
+/* Fechado, só as varas enroladas são de clicar (um golpe de cinzel abre): a área vai de pomo a pomo e da vara de cima à
+   de baixo. O papel ainda invisível não recebe o ponteiro. */
+.desenhadas .casa-pergaminho.enrolado { pointer-events: none; }
+.desenhadas .casa-pergaminho.enrolado::before {
+  content: ''; position: absolute; pointer-events: auto; cursor: var(--cursor-cinzel, pointer);
+  left: calc(-1 * var(--pomo, 12px)); right: calc(-1 * var(--pomo, 12px));
+  top: calc(-1 * var(--vara, 12px)); height: calc(2 * var(--vara, 12px));
+}
+
+.cs-marmore { fill: var(--marmore); } .cs-sombra { fill: var(--marmore-sombra); }
+.cs-fundo { fill: var(--marmore-fundo); } .cs-linha { fill: var(--marmore-linha); }
+.cs-telha { fill: var(--telha); } .cs-telha-sombra { fill: var(--telha-sombra); }
+.cs-pintura { fill: var(--pintura); }
+.cs-porta { fill: var(--porta); transition: fill .25s; }
+.cs-porta-sombra { fill: var(--porta-sombra); transition: fill .25s; }
+.cs-texto { fill: var(--marmore-linha); font-family: var(--fonte-numeral); font-weight: 600; }
+/* As portas acendem quando a casa ou o pergaminho dela está sob o ponteiro ou com foco. */
+.casa:hover .cs-porta, .casa:focus-within .cs-porta { fill: var(--lampada); }
+.casa:hover .cs-porta-sombra, .casa:focus-within .cs-porta-sombra { fill: var(--lampada-sombra); }
+
+/* ---------- o papel (o texto sobre o pergaminho; o pergaminho em si é o canvas) ---------- */
+
+.casa-papel {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  padding: 10px 22px 9px; text-align: center; white-space: nowrap;
+}
+.casa-rede { font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: #654a2c; }
+.casa-linha { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 16px; color: #2e241a; }
+.casa-linha a {
+  color: inherit; text-decoration: underline; text-decoration-color: #a07f4f;
+  text-underline-offset: 3px; text-decoration-thickness: 1px;
+}
+.casa-linha a:hover { text-decoration-color: var(--liga-1); }
+
+/* Copiar: botão em pixel com chanfro de 2 px, no metal do site. */
+.botao-copiar {
+  min-width: 62px; padding: 5px 7px 4px;
+  font: 700 9px/1 var(--fonte-pixel); letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--liga-sobre); background: var(--liga-2);
+  box-shadow: inset 2px 2px 0 var(--liga-3), inset -2px -2px 0 var(--liga-1), 0 0 0 2px var(--liga-0);
+}
+.botao-copiar:hover { background: var(--liga-hover); }
+.botao-copiar:active { box-shadow: inset 2px 2px 0 var(--liga-1), inset -2px -2px 0 var(--liga-3), 0 0 0 2px var(--liga-0); }
+.botao-copiar:focus-visible { outline: 2px solid #3b2f22; outline-offset: 3px; }
+
+/* ---------- a laje do jogo da velha (cenário na Fase 1) ---------- */
+
+.laje { position: absolute; z-index: 2; line-height: 0; pointer-events: none; }
+.laje[hidden] { display: none; }
+.laje svg { display: block; overflow: visible; }
+.lj-sombra { fill: #2c21163d; }
+.lj-tampo { fill: var(--marmore); }
+.lj-luz { fill: color-mix(in srgb, var(--marmore) 45%, #fff); }
+.lj-labio { fill: color-mix(in srgb, var(--marmore) 60%, #fff); }
+.lj-frente { fill: var(--marmore-sombra); }
+.lj-sulco { fill: var(--marmore-linha); }
+.lj-x { fill: #3a2b1b; }
+.lj-o { fill: #a8432c; }
+
+/* ---------- crédito ---------- */
+/* Uma etiqueta de mármore de duas linhas no pé da tela, legível sobre a grama escura e sobre a areia da trilha. Fica
+   centrada; o script a desliza para um vão livre se um papel ou a laje estiverem no caminho. */
+
+.credito {
+  position: absolute; left: 0; right: 0; bottom: 10px; z-index: 2;
+  width: max-content; margin: 0 auto; padding: 3px 8px;
+  font-size: 10px; line-height: 1.3; letter-spacing: .3px; text-align: center;
+  color: #5b4c3b; background: color-mix(in srgb, var(--marmore) 85%, transparent);
+}
+.credito a { color: inherit; text-underline-offset: 2px; }
+.contato.noite .credito { color: #1d1a14; }
+
+@media (max-width: 760px) {
+  .contato-cabeca { top: 5%; }
+  .contato-cabeca h2 { font-size: 46px; }
+  .contato-cabeca p { margin-top: 8px; font-size: 13px; }
+  /* O e-mail quebra antes do @ e o botão copiar desce quando não cabe. */
+  .casa-papel { max-width: 46vw; padding: 7px 12px 6px; white-space: normal; }
+  .casa-rede { font-size: 10px; letter-spacing: 1.3px; }
+  .casa-linha { flex-wrap: wrap; gap: 6px; font-size: 14px; }
+}

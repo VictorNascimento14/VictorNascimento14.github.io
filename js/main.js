@@ -9,6 +9,7 @@ const partes = [
   ['projetos', () => import('./secoes/projetos.js')],
   ['ano', () => import('./secoes/ano.js')],
   ['arena', () => import('./secoes/arena.js')],
+  ['contato', () => import('./secoes/contato.js')],
 ];
 
 // Sem o herói (não carregou, não iniciou ou desistiu antes do show), a primeira tela fica como na reserva sem
